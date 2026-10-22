@@ -1,4 +1,4 @@
-#ifndef AppVersion
+﻿#ifndef AppVersion
   #define AppVersion "1.0"
 #endif
 #ifndef PublishDir
@@ -38,8 +38,32 @@ RestartApplications=no
 Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "russian"; MessagesFile: "compiler:Languages\Russian.isl"
 
+[CustomMessages]
+english.Integration=Windows integration:
+russian.Integration=Интеграция с Windows:
+english.Autostart=Start Sweetch when I sign in to Windows
+russian.Autostart=Запускать Sweetch вместе с Windows
+english.ContextMenu=Add “Sweetch…” to the File Explorer right-click menu
+russian.ContextMenu=Добавить «Sweetch…» в контекстное меню Проводника
+
 [Tasks]
+Name: "autostart"; Description: "{cm:Autostart}"; GroupDescription: "{cm:Integration}"
+Name: "contextmenu"; Description: "{cm:ContextMenu}"; GroupDescription: "{cm:Integration}"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+
+; The same entries the app's own switches write (Shell/ShellIntegration.cs), so the two agree. Set here so a
+; reinstall over old settings still gets them; the app keeps them pointed at its exe, --unregister removes them.
+[Registry]
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "Sweetch"; ValueData: """{app}\Sweetch.exe"" --background"; Flags: uninsdeletevalue; Tasks: autostart
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run"; ValueType: none; ValueName: "Sweetch"; Flags: deletevalue; Tasks: autostart
+Root: HKCU; Subkey: "Software\Classes\*\shell\Sweetch"; ValueType: string; ValueName: ""; ValueData: "Sweetch…"; Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "Software\Classes\*\shell\Sweetch"; ValueType: string; ValueName: "Icon"; ValueData: """{app}\Sweetch.exe"",0"; Tasks: contextmenu
+Root: HKCU; Subkey: "Software\Classes\*\shell\Sweetch"; ValueType: string; ValueName: "MultiSelectModel"; ValueData: "Player"; Tasks: contextmenu
+Root: HKCU; Subkey: "Software\Classes\*\shell\Sweetch\command"; ValueType: string; ValueName: ""; ValueData: """{app}\Sweetch.exe"" --wheel ""%1"""; Tasks: contextmenu
+Root: HKCU; Subkey: "Software\Classes\Directory\shell\Sweetch"; ValueType: string; ValueName: ""; ValueData: "Sweetch…"; Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "Software\Classes\Directory\shell\Sweetch"; ValueType: string; ValueName: "Icon"; ValueData: """{app}\Sweetch.exe"",0"; Tasks: contextmenu
+Root: HKCU; Subkey: "Software\Classes\Directory\shell\Sweetch"; ValueType: string; ValueName: "MultiSelectModel"; ValueData: "Player"; Tasks: contextmenu
+Root: HKCU; Subkey: "Software\Classes\Directory\shell\Sweetch\command"; ValueType: string; ValueName: ""; ValueData: """{app}\Sweetch.exe"" --wheel ""%1"""; Tasks: contextmenu
 
 [Files]
 Source: "{#PublishDir}\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs ignoreversion

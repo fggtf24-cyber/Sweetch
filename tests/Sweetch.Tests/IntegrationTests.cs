@@ -180,7 +180,7 @@ public class IntegrationTests : IClassFixture<IntegrationTests.Samples>
                     Assert.Empty(Directory.GetFiles(outDir, "*.part.*"));
                     output.WriteLine($"ok   {op.Id} → {string.Join(", ", result.Outputs.Select(Path.GetFileName))}");
                 }
-                catch (ConversionException) when (key is "pdf" && !_s.PdfHasText && op.Id is "pdf.to.txt" or "pdf.to.md")
+                catch (ConversionException) when (key is "pdf" && !_s.PdfHasText && op.Id is "pdf.to.txt" or "pdf.to.md" or "pdf.to.docx" or "pdf.to.html" or "pdf.to.epub")
                 {
                     output.WriteLine($"ok   {op.Id} (expected: image-only PDF has no text)");
                 }
@@ -219,6 +219,23 @@ public class IntegrationTests : IClassFixture<IntegrationTests.Samples>
 
         var merged = Directory.GetFiles(outDir, "*.pdf").First(f => f.Contains("merged"));
         Assert.Equal(PdfBackend.PageCount(_s.Files["pdf"]) * 2, PdfBackend.PageCount(merged));
+    }
+
+    [Fact]
+    public async Task Container_change_keeps_the_video_stream_bit_for_bit()
+    {
+        if (!_s.Files.TryGetValue("mp4", out var mp4))
+            return;
+        var op = Catalog.Build().Single(o => o.Id == "video.to.mkv");
+        var result = await op.ExecuteAsync([new FileItem(mp4)], _s.Context(Path.Combine(_s.Dir, "out", "remux")));
+        Assert.Equal(await StreamMd5(mp4), await StreamMd5(result.Outputs[0]));
+
+        async Task<string> StreamMd5(string file)
+        {
+            var md5 = Path.Combine(_s.Dir, "out", "remux", Path.GetFileName(file) + ".md5");
+            await ProcessRunner.RunAsync(_s.Tools.Ffmpeg!, ["-hide_banner", "-y", "-i", file, "-map", "0:v", "-c", "copy", "-f", "md5", md5], default);
+            return File.ReadAllText(md5).Trim();
+        }
     }
 
     [Fact]

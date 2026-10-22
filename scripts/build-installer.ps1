@@ -6,7 +6,7 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 $PublishDirectory = (Resolve-Path -LiteralPath $PublishDirectory).Path
-foreach ($file in @('Sweetch.exe', 'tools/pandoc.exe', 'LICENSE', 'THIRD-PARTY-NOTICES.md')) {
+foreach ($file in @('Sweetch.exe', 'tools/pandoc.exe', 'tools/ffmpeg.exe', 'LICENSE', 'THIRD-PARTY-NOTICES.md')) {
     if (!(Test-Path -LiteralPath (Join-Path $PublishDirectory $file))) {
         throw "Published app is missing $file. Run build.ps1 first."
     }
@@ -18,7 +18,10 @@ if (!$Compiler) {
         $Compiler = @(
             "${env:ProgramFiles(x86)}/Inno Setup 6/ISCC.exe",
             "$env:ProgramFiles/Inno Setup 7/ISCC.exe",
-            "${env:ProgramFiles(x86)}/Inno Setup 7/ISCC.exe"
+            "${env:ProgramFiles(x86)}/Inno Setup 7/ISCC.exe",
+            # winget installs it per user
+            "$env:LOCALAPPDATA/Programs/Inno Setup 6/ISCC.exe",
+            "$env:LOCALAPPDATA/Programs/Inno Setup 7/ISCC.exe"
         ) | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
     }
 }
