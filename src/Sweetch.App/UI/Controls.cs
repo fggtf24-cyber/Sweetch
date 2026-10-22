@@ -23,15 +23,71 @@ internal static class Controls
         TextTrimming = wrap ? TextTrimming.None : TextTrimming.CharacterEllipsis,
     };
 
-    public static TextBlock SectionHeader(string text) => new()
+    /// <summary>A small upper-case label over a hairline, as in Smooth Cursor.</summary>
+    public static FrameworkElement SectionHeader(string text)
+    {
+        var panel = new StackPanel { Margin = new Thickness(2, 30, 0, 10) };
+        panel.Children.Add(new Border { Height = 1, Background = Theme.Track, Margin = new Thickness(-2, 0, 0, 12) });
+        panel.Children.Add(Caps(text));
+        return panel;
+    }
+
+    public static TextBlock Caps(string text, Brush? brush = null) => new()
+    {
+        Text = text.ToUpper(System.Globalization.CultureInfo.CurrentCulture),
+        FontFamily = Theme.UiFont,
+        FontSize = 11,
+        FontWeight = FontWeights.Medium,
+        Foreground = brush ?? Theme.Muted,
+    };
+
+    /// <summary>A big tight headline in Inter Medium; a line feed in the text breaks the line.</summary>
+    public static TextBlock Headline(string text, double size) => new()
     {
         Text = text,
         FontFamily = Theme.DisplayFont,
-        FontSize = 15,
-        FontWeight = FontWeights.SemiBold,
+        FontSize = size,
+        FontWeight = FontWeights.Medium,
         Foreground = Theme.Text,
-        Margin = new Thickness(2, 26, 0, 8),
+        LineHeight = size * 1.02,
+        LineStackingStrategy = LineStackingStrategy.BlockLineHeight,
+        TextWrapping = TextWrapping.Wrap,
     };
+
+    public static TextBlock Mono(string text, double size = 12, Brush? brush = null) => new()
+    {
+        Text = text,
+        FontFamily = Theme.MonoFont,
+        FontSize = size,
+        Foreground = brush ?? Theme.Muted,
+        VerticalAlignment = VerticalAlignment.Center,
+    };
+
+    /// <summary>Progress as a row of small squares (Smooth Cursor's bar), filled with the accent.</summary>
+    public sealed class SquareBar : StackPanel
+    {
+        public SquareBar(int count = 24)
+        {
+            Orientation = Orientation.Horizontal;
+            for (var i = 0; i < count; i++)
+                Children.Add(new Border { Width = 9, Height = 9, Margin = new Thickness(0, 0, 4, 0), CornerRadius = new CornerRadius(2), BorderThickness = new Thickness(1) });
+            Value = 0;
+        }
+
+        public double Value
+        {
+            set
+            {
+                var on = (int)Math.Round(Children.Count * Math.Clamp(value, 0, 1));
+                for (var i = 0; i < Children.Count; i++)
+                {
+                    var square = (Border)Children[i];
+                    square.Background = i < on ? Theme.Accent : Brushes.Transparent;
+                    square.BorderBrush = i < on ? Theme.Accent : Theme.Track;
+                }
+            }
+        }
+    }
 
     /// <summary>A rounded card with a title/description on the left and a control on the right.</summary>
     public static Border Card(string title, string? description, UIElement? control, UIElement? below = null, string? glyph = null)

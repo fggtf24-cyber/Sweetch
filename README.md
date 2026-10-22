@@ -1,4 +1,4 @@
-# Sweetch 1.0
+# Sweetch 1.1
 
 Файловый конвертер для Windows с круговым меню. Автор проекта Sweetch: [@mmmorozov](https://t.me/mmmorozov).
 
@@ -6,10 +6,10 @@
 
 | Вариант | Скачать | Как запустить |
 | --- | --- | --- |
-| **Установщик EXE** | [Sweetch 1.0 — установить](https://github.com/krllmrzv/Sweetch/releases/download/v1.0/Sweetch-1.0-Setup-win-x64.exe) | Запустите установщик. Он добавит программу в меню «Пуск» и позволит удалить её через настройки Windows. |
-| **Архив ZIP без установки** | [Sweetch 1.0 — скачать архив](https://github.com/krllmrzv/Sweetch/releases/download/v1.0/Sweetch-1.0-win-x64.zip) | Распакуйте всю папку и запустите `Sweetch.exe`. |
+| **Установщик EXE** | [Sweetch — установить](https://github.com/fggtf24-cyber/Sweetch/releases/latest) (`Sweetch-<версия>-Setup-win-x64.exe`) | Запустите установщик. Он добавит программу в меню «Пуск», включит запуск вместе с Windows и позволит удалить её через настройки Windows. |
+| **Архив ZIP без установки** | [Sweetch — скачать архив](https://github.com/fggtf24-cyber/Sweetch/releases/latest) | Распакуйте всю папку и запустите `Sweetch.exe`. |
 
-Оба варианта содержат готовую программу, .NET и Pandoc. Нужна Windows 10 (1809+) или Windows 11, x64. [Все файлы релиза и контрольные суммы SHA-256](https://github.com/krllmrzv/Sweetch/releases/tag/v1.0). Пункты **Source code** и кнопка **Code → Download ZIP** предназначены для разработчиков и содержат исходники.
+Оба варианта содержат готовую программу, .NET, Pandoc и FFmpeg. Нужна Windows 10 (1809+) или Windows 11, x64. [Все файлы релиза и контрольные суммы SHA-256](https://github.com/fggtf24-cyber/Sweetch/releases/latest). Пункты **Source code** и кнопка **Code → Download ZIP** предназначены для разработчиков и содержат исходники.
 
 <p align="center">
   <img src="docs/dark.png" width="48%" alt="Sweetch: красно-чёрная тема" />
@@ -36,7 +36,7 @@
 - USDT · TRC20: `TQHTy7kbk3ngYTUfrTpEeSi3hP38tnqJNU`
 - [Telegram-канал](https://t.me/mmmorozov)
 
-Автообновления отключены: Sweetch 1.0 не обращается к серверу обновлений и не устанавливает сторонние версии. Новые версии будут объявляться в канале. Обратная связь открывает Telegram; встроенной отправки сообщений на сторонний сервер нет.
+Обновления приходят из релизов GitHub [fggtf24-cyber/Sweetch](https://github.com/fggtf24-cyber/Sweetch/releases): программа дважды в день проверяет, не вышла ли новая версия, и показывает карточку «Обновить / Не сейчас». Установщик скачивается только из этого репозитория, сверяется по размеру и SHA-256, ставится без вопросов, и Sweetch перезапускается уже обновлённым. Выключается в «О приложении → Обновления». Чтобы выпустить обновление, поднимите `<Version>` в `src/Sweetch.App/Sweetch.App.csproj`, соберите установщик и приложите `Sweetch-<версия>-Setup-win-x64.exe` к релизу с тегом `v<версия>`. Обратная связь открывает Telegram; встроенной отправки сообщений на сторонний сервер нет.
 
 ## Сборка
 

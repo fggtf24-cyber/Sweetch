@@ -29,9 +29,11 @@ internal static class SelfTest
             Check(Enum.GetValues<Language>().Length == 2, "only English and Russian languages");
             Check(Brand.Trc20 == "TQHTy7kbk3ngYTUfrTpEeSi3hP38tnqJNU", "TRC20 support address");
             Check(Brand.DonatePay == "https://donatepay.ru/don/1539048" && Brand.Channel == "https://t.me/mmmorozov", "project links");
-            var disabledUpdater = new Shell.Updater();
-            Check(disabledUpdater.CheckAsync().GetAwaiter().GetResult() is null && disabledUpdater.LastChecked is null, "updates disabled");
-            log.Add("ok Sweetch 1.0 branding, links, languages and disabled updates");
+            // Constructing the updater must not touch the network; checks start only from the running app.
+            var updater = new Shell.Updater();
+            Check(updater.LastChecked is null && updater.Available is null && Shell.Updater.Repo == "fggtf24-cyber/Sweetch", "updater idle until started");
+            Check(Shell.Updater.Current >= new Version(1, 1, 0), "version 1.1+");
+            log.Add("ok Sweetch branding, links, languages and updater configuration");
             TestBundledPandoc(outDir, log);
             foreach (var (language, dark, folder) in new[] { (Language.English, true, "en"), (Language.English, false, "en-light"), (Language.Russian, true, "ru"), (Language.Russian, false, "ru-light") })
             {
@@ -43,7 +45,7 @@ internal static class SelfTest
 
             log.AddRange(SmokeTest.Run(Path.Combine(outDir, "smoke")));
             // Saved after every step, so a hard crash (which skips the catch below) still shows where it stopped.
-            foreach (var step in new Action[] { () => TestSettingsRoundTrip(log), () => TestExplorerCom(outDir, log), () => TestDrops(log), () => TestWatchFolder(outDir, log), () => TestOcr(outDir, log), () => log.Add("ok updates disabled: no network request") })
+            foreach (var step in new Action[] { () => TestSettingsRoundTrip(log), () => TestExplorerCom(outDir, log), () => TestDrops(log), () => TestWatchFolder(outDir, log), () => TestOcr(outDir, log), () => log.Add("ok updater: no network request during the self-test") })
             {
                 File.WriteAllLines(Path.Combine(outDir, "self-test.txt"), log);
                 step();
@@ -129,6 +131,11 @@ internal static class SelfTest
         toolsWheel.Close();
         log.Add($"ok {Path.GetFileName(outDir)}/settings-wheels-tools");
 
+        var update = UpdateWindow.Preview(new UpdateInfo(new Version(1, 2, 0), "v1.2.0", "", null, null, 106_430_000), 0.42);
+        SaveWindow(update, Path.Combine(outDir, "update.png"), 640);
+        update.Close();
+        log.Add($"ok {Path.GetFileName(outDir)}/update");
+
         var feedback = new FeedbackWindow();
         SaveWindow(feedback, Path.Combine(outDir, "feedback.png"), 560);
         feedback.Close();
@@ -173,7 +180,7 @@ internal static class SelfTest
         Check(back.Hotkey == HotkeyPreset.CtrlAltW && back.FavoriteOperations.Single() == "image.to.webp" && back.Language == Language.Russian, "settings JSON round trip");
         Check(json.Contains("\"CtrlAltW\""), "enums stored as names");
         Check(back.Appearance == AppAppearance.Light, "theme setting round trip");
-        Check(AppSettings.Folder.EndsWith("Sweetch") && !new AppSettings().CheckForUpdates, "isolated settings and updates off by default");
+        Check(AppSettings.Folder.EndsWith("Sweetch") && new AppSettings().AutoUpdate, "isolated settings and automatic updates on by default");
         log.Add("ok settings json");
     }
 

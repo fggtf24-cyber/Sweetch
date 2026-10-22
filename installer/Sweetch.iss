@@ -74,6 +74,14 @@ Name: "{userdesktop}\Sweetch"; Filename: "{app}\Sweetch.exe"; Tasks: desktopicon
 
 [Run]
 Filename: "{app}\Sweetch.exe"; Description: "{cm:LaunchProgram,Sweetch}"; Flags: nowait postinstall skipifsilent
+; A silent update started from inside Sweetch (Shell/Updater.cs passes /UPDATED=1): start the new version.
+Filename: "{app}\Sweetch.exe"; Parameters: "--updated"; Flags: nowait; Check: IsAppUpdate
+
+[Code]
+function IsAppUpdate: Boolean;
+begin
+  Result := ExpandConstant('{param:UPDATED|0}') = '1';
+end;
 
 [UninstallRun]
 Filename: "{app}\Sweetch.exe"; Parameters: "--unregister"; Flags: runhidden waituntilterminated; RunOnceId: "Unregister"

@@ -56,7 +56,11 @@ public sealed class AppSettings
 
     public Dictionary<string, string>? LastParameters { get; set; }
 
-    public bool CheckForUpdates { get; set; } = false;
+    /// <summary>Check GitHub for a new version and offer to install it (a new name: old files said false here).</summary>
+    public bool AutoUpdate { get; set; } = true;
+
+    /// <summary>A version the user said "Not now" to; not offered again.</summary>
+    public string? SkippedVersion { get; set; }
 
     /// <summary>Slices the user put together (e.g. "JPG 70 %"); they appear on the wheels like the built-in ones.</summary>
     public List<Preset> Presets { get; set; } = [];

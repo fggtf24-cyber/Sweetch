@@ -205,7 +205,7 @@ internal sealed partial class SettingsWindow : Window
         DockPanel.SetDock(brand, Dock.Top);
         dock.Children.Add(brand);
 
-        var version = Text(T("Version ", "Версия ") + Shell.Updater.Current, 12, brush: Theme.Muted);
+        var version = Mono("v" + Shell.Updater.Current, 11);
         version.Margin = new Thickness(10, 12, 0, 0);
         DockPanel.SetDock(version, Dock.Bottom);
         dock.Children.Add(version);
@@ -262,11 +262,9 @@ internal sealed partial class SettingsWindow : Window
 
     private static void PageHeader(Panel page, string title, string subtitle)
     {
-        var t = Text(title, 28, FontWeights.SemiBold);
-        t.FontFamily = Theme.DisplayFont;
-        page.Children.Add(t);
+        page.Children.Add(Headline(title, 46));
         var s = Text(subtitle, 13.5, brush: Theme.Muted);
-        s.Margin = new Thickness(0, 4, 0, 6);
+        s.Margin = new Thickness(0, 10, 0, 6);
         page.Children.Add(s);
     }
 

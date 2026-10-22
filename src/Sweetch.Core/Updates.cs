@@ -3,7 +3,7 @@ using System.Text.Json;
 namespace Sweetch.Core;
 
 /// <summary>The latest published release, as reported by the GitHub releases API.</summary>
-public sealed record UpdateInfo(Version Version, string Tag, string PageUrl, string? InstallerUrl, string? InstallerSha256)
+public sealed record UpdateInfo(Version Version, string Tag, string PageUrl, string? InstallerUrl, string? InstallerSha256, long InstallerSize = 0)
 {
 
     /// <summary>Parses a "releases/latest" response; null when it isn't a usable release.</summary>
@@ -22,20 +22,25 @@ public sealed record UpdateInfo(Version Version, string Tag, string PageUrl, str
 
         string? installer = null;
         string? sha = null;
+        long size = 0;
         if (root.TryGetProperty("assets", out var assets))
         {
             foreach (var asset in assets.EnumerateArray())
             {
                 var name = asset.GetProperty("name").GetString() ?? "";
-                if (!name.StartsWith("Sweetch-Setup-", StringComparison.OrdinalIgnoreCase) || !name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
+                // "Sweetch-1.1.0-Setup-win-x64.exe" (what build-installer.ps1 makes) or "Sweetch-Setup-1.1.0.exe".
+                if (!name.StartsWith("Sweetch-", StringComparison.OrdinalIgnoreCase) || !name.Contains("Setup", StringComparison.OrdinalIgnoreCase)
+                    || !name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
                     continue;
                 installer = asset.GetProperty("browser_download_url").GetString();
+                if (asset.TryGetProperty("size", out var bytes) && bytes.TryGetInt64(out var n))
+                    size = n;
                 if (asset.TryGetProperty("digest", out var digest) && digest.GetString() is { } d && d.StartsWith("sha256:", StringComparison.OrdinalIgnoreCase))
                     sha = d["sha256:".Length..].ToLowerInvariant();
                 break;
             }
         }
-        return new UpdateInfo(version, tag, page, installer, sha);
+        return new UpdateInfo(version, tag, page, installer, sha, size);
     }
 
     public bool IsNewerThan(Version current) => Version > Normalize(current);

@@ -71,8 +71,12 @@ internal static class Theme
     public static readonly SolidColorBrush Success = Freeze(new SolidColorBrush(Color.FromRgb(0x3C, 0xC3, 0x6E)));
 
     public static readonly FontFamily Icons = new("Segoe Fluent Icons, Segoe MDL2 Assets");
-    public static readonly FontFamily UiFont = new("Segoe UI Variable Text, Segoe UI");
-    public static readonly FontFamily DisplayFont = new("Segoe UI Variable Display, Segoe UI");
+    // Type from Smooth Cursor: Inter for text and headlines, IBM Plex Mono for versions, sizes and counts.
+    // Bundled (Assets/Fonts, SIL OFL); Segoe stays as the fallback for scripts Inter lacks.
+    private static readonly Uri FontBase = new("pack://application:,,,/");
+    public static readonly FontFamily UiFont = new(FontBase, "./Assets/Fonts/#Inter, Segoe UI Variable Text, Segoe UI");
+    public static readonly FontFamily DisplayFont = UiFont;
+    public static readonly FontFamily MonoFont = new(FontBase, "./Assets/Fonts/#IBM Plex Mono, Cascadia Mono, Consolas");
 
     public static bool IsDark { get; private set; } = true;
 

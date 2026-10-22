@@ -99,7 +99,7 @@ internal sealed class App : Application
         _watcher.Apply();
         SettingsWindow.Updater = _updater;
         SettingsWindow.Operations = () => _controller.AllOperations;
-        // Updates are disabled until a Sweetch release repository is configured.
+        _updater.StartBackgroundChecks(_settings, OfferUpdate);
         _hotkey = new HotkeyListener(_controller.OnHotkey);
         ApplyHotkey();
         _instance.Listen(Dispatcher, HandleArgs);
@@ -140,8 +140,21 @@ internal sealed class App : Application
     {
         var tray = new TrayIcon(OpenSettings, () => _controller.OpenForClipboard(), () => ShelfWindow.Open([]), ShowHelp, UI.FeedbackWindow.ShowSingle, SetPaused, _settings.Paused, () => Shutdown());
         if (_updater.Available is { } update)
-            tray.OfferUpdate(update.Version, () => _ = _updater.InstallAsync(update));
+            tray.OfferUpdate(update.Version, () => UpdateWindow.ShowFor(update, _updater, SkipUpdate));
         return tray;
+    }
+
+    /// <summary>A newer release: the card in the middle of the screen, and "Update to…" stays in the tray menu.</summary>
+    private void OfferUpdate(UpdateInfo update)
+    {
+        _tray?.OfferUpdate(update.Version, () => UpdateWindow.ShowFor(update, _updater, SkipUpdate));
+        UpdateWindow.ShowFor(update, _updater, SkipUpdate);
+    }
+
+    private void SkipUpdate(UpdateInfo update)
+    {
+        _settings.SkippedVersion = update.Tag;
+        _settings.Save();
     }
 
     private void HandleArgs(string[] args)

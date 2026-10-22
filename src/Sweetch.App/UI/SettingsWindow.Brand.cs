@@ -16,7 +16,7 @@ internal sealed partial class SettingsWindow
             Width = 72, Height = 72, Margin = new Thickness(0, 0, 20, 0)
         });
         var heading = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
-        heading.Children.Add(Text("Sweetch 1.0", 30, FontWeights.SemiBold));
+        heading.Children.Add(Headline("Sweetch", 40));
         heading.Children.Add(Text(T("A new shape for your files.", "Новая форма ваших файлов."), 14, brush: Theme.Muted));
         header.Children.Add(heading); root.Children.Add(header);
         root.Children.Add(Card(T("Project creator", "Автор проекта"), "@mmmorozov",
@@ -28,9 +28,51 @@ internal sealed partial class SettingsWindow
             T("News and feedback on the project's Telegram channel.", "Новости и обратная связь в Telegram-канале проекта."),
             Button("@mmmorozov", () => Shell.Updater.Open(Brand.Channel), glyph: ""), glyph: ""));
         root.Children.Add(SectionHeader(T("Updates", "Обновления")));
-        root.Children.Add(Card("Sweetch 1.0", T("Automatic updates are disabled. New releases will be announced on the channel.", "Автообновления отключены. Новые версии будут опубликованы в канале."), null, glyph: ""));
+        root.Children.Add(Card(T("Update automatically", "Обновлять автоматически"),
+            T("Sweetch checks GitHub twice a day and offers a new version; it installs only when you say so.",
+              "Sweetch дважды в день проверяет GitHub и предлагает новую версию; ставит только с вашего согласия."),
+            Toggle(_settings.AutoUpdate, v =>
+            {
+                _settings.AutoUpdate = v;
+                Save();
+            }), glyph: ""));
+        root.Children.Add(UpdatesCard());
         var footer = Text(T("Local processing. Your files stay on your computer.", "Локальная обработка. Ваши файлы остаются на компьютере."), 12, brush: Theme.Muted);
         footer.Margin = new Thickness(2, 24, 0, 0); root.Children.Add(footer);
+    }
+
+    /// <summary>The version, what the last check found, and Check now / Update.</summary>
+    private Border UpdatesCard()
+    {
+        var updater = Updater;
+        var status = updater switch
+        {
+            null => "",
+            { Installing: true } => T("Installing the update…", "Устанавливаю обновление…"),
+            { Available: { } a } => T($"Version {a.Version} is available.", $"Доступна версия {a.Version}."),
+            { LastError: not null } => T("Couldn't reach GitHub. Will try again later.", "Не удалось связаться с GitHub. Попробую позже."),
+            { LastChecked: { } at } => T($"Up to date · checked at {at:HH:mm}", $"Последняя версия · проверено в {at:HH:mm}"),
+            _ => T("Not checked yet.", "Ещё не проверялось."),
+        };
+        var below = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 12, 0, 0) };
+        if (updater?.Available is { } update)
+            below.Children.Add(Button(T("Update", "Обновить"), () => UpdateWindow.ShowFor(update, updater, SkipUpdate), primary: true));
+        else if (updater is not null)
+            below.Children.Add(Button(T("Check now", "Проверить сейчас"), async () =>
+            {
+                if (await updater.CheckAsync() is { } found)
+                    UpdateWindow.ShowFor(found, updater, SkipUpdate);
+            }));
+        var page = Button(T("Releases on GitHub", "Релизы на GitHub"), () => Shell.Updater.Open(Shell.Updater.Page));
+        page.Margin = new Thickness(8, 0, 0, 0);
+        below.Children.Add(page);
+        return Card("Sweetch " + Shell.Updater.Current, status, Mono(Shell.Updater.Repo, 11), below);
+    }
+
+    private void SkipUpdate(Core.UpdateInfo update)
+    {
+        _settings.SkippedVersion = update.Tag;
+        Save();
     }
 
     private static Border SupportCard()

@@ -1,11 +1,13 @@
 param(
-    [ValidatePattern('^\d+\.\d+(\.\d+){0,2}$')][string]$Version = '1.0',
+    [ValidatePattern('^\d+\.\d+(\.\d+){0,2}$')][string]$Version,
     [string]$PublishDirectory = (Join-Path $PSScriptRoot '../publish'),
     [string]$OutputDirectory = (Join-Path $PSScriptRoot '../artifacts'),
     [string]$Compiler
 )
 $ErrorActionPreference = 'Stop'
 $PublishDirectory = (Resolve-Path -LiteralPath $PublishDirectory).Path
+# By default the version of the published app (set in Sweetch.App.csproj), so the two can't drift apart.
+if (!$Version) { $Version = (Get-Item -LiteralPath (Join-Path $PublishDirectory 'Sweetch.exe')).VersionInfo.ProductVersion -replace '\+.*$', '' }
 foreach ($file in @('Sweetch.exe', 'tools/pandoc.exe', 'tools/ffmpeg.exe', 'LICENSE', 'THIRD-PARTY-NOTICES.md')) {
     if (!(Test-Path -LiteralPath (Join-Path $PublishDirectory $file))) {
         throw "Published app is missing $file. Run build.ps1 first."

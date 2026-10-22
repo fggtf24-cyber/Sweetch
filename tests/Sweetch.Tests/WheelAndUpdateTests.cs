@@ -38,7 +38,7 @@ public class UpdateTests
           "prerelease": false,
           "assets": [
             { "name": "Sweetch-1.2.0-win-x64.zip", "browser_download_url": "https://example.com/zip" },
-            { "name": "Sweetch-Setup-1.2.0.exe", "browser_download_url": "https://example.com/setup.exe", "digest": "sha256:ABCDEF" }
+            { "name": "Sweetch-1.2.0-Setup-win-x64.exe", "browser_download_url": "https://example.com/setup.exe", "size": 106430000, "digest": "sha256:ABCDEF" }
           ]
         }
         """;
@@ -50,7 +50,13 @@ public class UpdateTests
         Assert.Equal(new Version(1, 2, 0), info.Version);
         Assert.Equal("https://example.com/setup.exe", info.InstallerUrl);
         Assert.Equal("abcdef", info.InstallerSha256);
+        Assert.Equal(106430000, info.InstallerSize);
     }
+
+    [Fact]
+    public void Finds_the_older_installer_name_too() =>
+        Assert.Equal("https://example.com/old.exe",
+            UpdateInfo.Parse(Json.Replace("Sweetch-1.2.0-Setup-win-x64.exe\", \"browser_download_url\": \"https://example.com/setup.exe", "Sweetch-Setup-1.2.0.exe\", \"browser_download_url\": \"https://example.com/old.exe"))!.InstallerUrl);
 
     [Theory]
     [InlineData("1.1.1.0", true)]
