@@ -16,27 +16,28 @@ public static partial class FfmpegBackend
     /// <summary>Encoder arguments for a target container.</summary>
     public static IReadOnlyList<string> CodecArgs(string format, Settings s, bool hasVideo = true)
     {
-        var crf = s.VideoCrf.ToString(CultureInfo.InvariantCulture);
+        // Conversions only change the format: visually lossless video, generous audio.
+        var crf = "18";
         string[] h264 = ["-c:v", "libx264", "-preset", "medium", "-crf", crf, "-pix_fmt", "yuv420p", "-vf", "scale=trunc(iw/2)*2:trunc(ih/2)*2"];
         return format switch
         {
-            "mp4" => [.. h264, "-c:a", "aac", "-b:a", "160k", "-movflags", "+faststart"],
-            "mov" => [.. h264, "-c:a", "aac", "-b:a", "160k"],
-            "mkv" => [.. h264, "-c:a", "aac", "-b:a", "160k"],
-            "webm" => ["-c:v", "libvpx-vp9", "-pix_fmt", "yuv420p", "-crf", "32", "-b:v", "0", "-row-mt", "1", "-deadline", "good", "-cpu-used", "4", "-c:a", "libopus", "-b:a", "128k"],
+            "mp4" => [.. h264, "-c:a", "aac", "-b:a", "256k", "-movflags", "+faststart"],
+            "mov" => [.. h264, "-c:a", "aac", "-b:a", "256k"],
+            "mkv" => [.. h264, "-c:a", "aac", "-b:a", "256k"],
+            "webm" => ["-c:v", "libvpx-vp9", "-pix_fmt", "yuv420p", "-crf", "20", "-b:v", "0", "-row-mt", "1", "-deadline", "good", "-cpu-used", "4", "-c:a", "libopus", "-b:a", "192k"],
             "gif" => ["-vf", "fps=12,scale='min(640,iw)':-2:flags=lanczos,split[a][b];[a]palettegen=stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=4", "-loop", "0"],
-            "mp3" => ["-vn", "-c:a", "libmp3lame", "-q:a", "2"],
-            "m4a" => ["-vn", "-c:a", "aac", "-b:a", "192k"],
-            "aac" => ["-vn", "-c:a", "aac", "-b:a", "192k"],
+            "mp3" => ["-vn", "-c:a", "libmp3lame", "-q:a", "0"],
+            "m4a" => ["-vn", "-c:a", "aac", "-b:a", "256k"],
+            "aac" => ["-vn", "-c:a", "aac", "-b:a", "256k"],
             "wav" => ["-vn", "-c:a", "pcm_s16le"],
             "aiff" => ["-vn", "-c:a", "pcm_s16be"],
             "flac" => ["-vn", "-c:a", "flac"],
-            "ogg" => ["-vn", "-c:a", "libvorbis", "-q:a", "5"],
-            "opus" => ["-vn", "-c:a", "libopus", "-b:a", "128k"],
-            "wma" => ["-vn", "-c:a", "wmav2", "-b:a", "192k"],
-            "avi" => ["-c:v", "mpeg4", "-q:v", "4", "-c:a", "libmp3lame", "-q:a", "3"],
-            "wmv" => ["-c:v", "wmv2", "-q:v", "4", "-c:a", "wmav2"],
-            _ => [.. h264, "-c:a", "aac", "-b:a", "160k"],
+            "ogg" => ["-vn", "-c:a", "libvorbis", "-q:a", "8"],
+            "opus" => ["-vn", "-c:a", "libopus", "-b:a", "192k"],
+            "wma" => ["-vn", "-c:a", "wmav2", "-b:a", "256k"],
+            "avi" => ["-c:v", "mpeg4", "-q:v", "2", "-c:a", "libmp3lame", "-q:a", "0"],
+            "wmv" => ["-c:v", "wmv2", "-q:v", "2", "-c:a", "wmav2", "-b:a", "256k"],
+            _ => [.. h264, "-c:a", "aac", "-b:a", "256k"],
         };
     }
 
@@ -96,8 +97,35 @@ public static partial class FfmpegBackend
         + double.Parse(m.Groups[3].Value, CultureInfo.InvariantCulture);
 
     public static Task<string> ConvertAsync(FileItem item, string format, OperationContext ctx, IProgress<double> progress) =>
-        OutputPaths.ProduceAsync(ctx.OutputDirFor(item.Path), item.BaseName, format, tmp =>
-            RunAsync(ctx, [item.Path], CodecArgs(format, ctx.Settings), tmp, progress));
+        OutputPaths.ProduceAsync(ctx.OutputDirFor(item.Path), item.BaseName, format, async tmp =>
+        {
+            // When the streams fit the new container, only the container changes: the same bits, in seconds.
+            // ffmpeg refuses codecs a container can't hold, and then we re-encode.
+            if (CopyArgs(format) is { } copy)
+            {
+                try
+                {
+                    await RunAsync(ctx, [item.Path], copy, tmp, progress).ConfigureAwait(false);
+                    return;
+                }
+                catch (ConversionException) when (!ctx.CancellationToken.IsCancellationRequested)
+                {
+                }
+            }
+            await RunAsync(ctx, [item.Path], CodecArgs(format, ctx.Settings), tmp, progress).ConfigureAwait(false);
+        });
+
+    /// <summary>
+    /// Stream copy into containers whose muxers reject codecs they can't hold. Not WAV/AIFF/FLAC (they'd accept
+    /// compressed audio as-is) nor AVI/WMV/GIF (legacy codecs or a real re-encode).
+    /// </summary>
+    private static string[]? CopyArgs(string format) => format switch
+    {
+        "mp4" => ["-c", "copy", "-movflags", "+faststart"],
+        "mov" or "mkv" or "webm" => ["-c", "copy"],
+        "m4a" or "mp3" or "ogg" or "opus" => ["-vn", "-c:a", "copy"],
+        _ => null,
+    };
 
     /// <summary>Re-encodes in the source container with extra filter/encoder args; output gets a suffix.</summary>
     public static Task<string> TransformAsync(

@@ -63,9 +63,24 @@ public static class ImageBackend
         {
             using var image = Load(input);
             ct.ThrowIfCancellationRequested();
-            PrepareFor(image, format, settings.JpegQuality);
+            // Only the format changes: a lossy source keeps its own quality, a lossless one stays lossless
+            // (or as close as the target allows).
+            var quality = SourceQuality(image, Formats.KeyOf(input));
+            PrepareFor(image, format, quality ?? 100);
+            if (quality is null && format == "webp")
+                image.Settings.SetDefine(MagickFormat.WebP, "lossless", "true");
+            if (quality is null && format == "jpg")
+                image.Settings.SetDefine(MagickFormat.Jpeg, "sampling-factor", "4:4:4");
             image.Write(output, ToMagickFormat(format));
         }, ct);
+
+    private static readonly HashSet<string> LossyInputs = ["jpg", "jpeg", "jfif", "webp", "heic", "heif", "avif"];
+
+    /// <summary>The quality a lossy source was saved with (read from the file), or null for lossless sources.</summary>
+    private static int? SourceQuality(MagickImage image, string inputKey) =>
+        !LossyInputs.Contains(inputKey) ? null
+        : image.Quality is > 0 and <= 100 ? (int)image.Quality
+        : 95; // lossy, but the file doesn't say how much
 
     /// <summary>Applies <paramref name="edit"/> and saves in the source format.</summary>
     public static Task EditAsync(string input, string output, Action<MagickImage> edit, int? quality, CancellationToken ct) =>

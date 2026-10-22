@@ -54,7 +54,10 @@ internal sealed class JobsWindow : Window
     {
         _cards.Children.Remove(card);
         if (_cards.Children.Count == 0)
+        {
             Hide();
+            App.TrimMemorySoon();
+        }
     }
 
     private void PlaceInCorner()
@@ -180,7 +183,11 @@ internal sealed class JobCard : Border
         }
         // Indeterminate state: a short segment breathing until real progress arrives.
         _fill.Width = 48;
-        _fill.BeginAnimation(OpacityProperty, new DoubleAnimation(0.35, 1, TimeSpan.FromMilliseconds(700)) { AutoReverse = true, RepeatBehavior = RepeatBehavior.Forever });
+        // Runs for as long as the job: a transparent window is re-rendered and copied back every frame,
+        // so a slow breath at 15 fps instead of 60.
+        var pulse = new DoubleAnimation(0.35, 1, TimeSpan.FromMilliseconds(900)) { AutoReverse = true, RepeatBehavior = RepeatBehavior.Forever };
+        Timeline.SetDesiredFrameRate(pulse, 15);
+        _fill.BeginAnimation(OpacityProperty, pulse);
     }
 
     public void Report(double value)

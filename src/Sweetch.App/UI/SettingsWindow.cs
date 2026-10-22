@@ -56,6 +56,7 @@ internal sealed partial class SettingsWindow : Window
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
         Icon = new BitmapImage(new Uri("pack://application:,,,/Assets/Sweetch.ico"));
         Background = Theme.Page;
+        SourceInitialized += (_, _) => Theme.ApplyBackdrop(this);
         FontFamily = Theme.UiFont;
         Build();
         Action refresh = () => Dispatcher.BeginInvoke(Rebuild);
@@ -64,6 +65,7 @@ internal sealed partial class SettingsWindow : Window
         Closed += (_, _) =>
         {
             _open = null;
+            App.TrimMemorySoon();
             if (Updater is not null)
                 Updater.Changed -= refresh;
         };
@@ -299,7 +301,7 @@ internal sealed partial class SettingsWindow : Window
                     Save();
                     Theme.Override = value switch { AppAppearance.Dark => true, AppAppearance.Light => false, _ => null };
                     Theme.Refresh();
-                    Background = Theme.Page;
+                    Theme.ApplyBackdrop(this);
                     Rebuild();
                 }), glyph: ""));
 
@@ -397,7 +399,7 @@ internal sealed partial class SettingsWindow : Window
     {
         PageHeader(root, PageName(SettingsPage.Quality), T("The balance between quality and file size.", "Баланс между качеством и размером файла."));
         root.Children.Add(SectionHeader(T("Images", "Изображения")));
-        root.Children.Add(Card(T("JPG, WebP and AVIF", "JPG, WebP и AVIF"), T("Quality when converting images", "Качество конвертации изображений"),
+        root.Children.Add(Card(T("JPG, WebP and AVIF", "JPG, WebP и AVIF"), T("Quality for PDF pages and image tools. Converting keeps the original quality.", "Качество страниц PDF и инструментов. При конвертации сохраняется исходное качество."),
             Slider(50, 100, _settings.Quality.JpegQuality, v => _settings.Quality.JpegQuality = v, Save), glyph: Glyphs.Photo));
         root.Children.Add(Card(T("Compress", "Сжать"), T("Quality of the Compress tool", "Качество инструмента «Сжать»"),
             Slider(30, 95, _settings.Quality.CompressQuality, v => _settings.Quality.CompressQuality = v, Save), glyph: Glyphs.Shrink));

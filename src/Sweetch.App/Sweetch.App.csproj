@@ -17,6 +17,8 @@
     <EnableDefaultApplicationDefinition>false</EnableDefaultApplicationDefinition>
     <Version>1.0.0</Version>
     <SatelliteResourceLanguages>en;ru</SatelliteResourceLanguages>
+    <!-- A tray app: no background GC thread and its extra heap reservations. -->
+    <ConcurrentGarbageCollection>false</ConcurrentGarbageCollection>
     <!--
       Smaller download: trim only libraries marked as trim-safe (the .NET runtime, the Windows SDK projection…);
       WPF, WinForms and our own code are kept whole. The UI self-test in CI runs conversions in the trimmed build.

@@ -121,6 +121,7 @@ internal sealed class App : Application
             _tray.Show(T("Sweetch is running", "Sweetch запущен"), T("Grab a file, tap Shift while dragging and drop it on a format.", "Перетащите файл, нажмите Shift и отпустите его над нужным форматом."), false);
         }
         HandleArgs(_args);
+        TrimMemorySoon();
     }
 
     private static void TryIntegrateOnFirstRun()
@@ -263,6 +264,27 @@ internal sealed class App : Application
         Log(e.Exception);
         e.Handled = true;
         Notifications.Show(T("Sweetch – error", "Sweetch — ошибка"), e.Exception.Message, error: true);
+    }
+
+    private static DispatcherTimer? _trimTimer;
+
+    /// <summary>
+    /// Sweetch sits in the tray almost all the time. Once a window has closed or a job has finished, hand
+    /// the memory of WPF visuals, decoded images and conversion buffers back to Windows (debounced).
+    /// </summary>
+    public static void TrimMemorySoon()
+    {
+        if (Current is null)
+            return; // self-test
+        _trimTimer ??= new DispatcherTimer(TimeSpan.FromSeconds(3), DispatcherPriority.ApplicationIdle, (_, _) =>
+        {
+            _trimTimer!.Stop();
+            GC.Collect(2, GCCollectionMode.Forced, blocking: true, compacting: true);
+            GC.WaitForPendingFinalizers();
+            Native.Win32.SetProcessWorkingSetSize(Native.Win32.GetCurrentProcess(), -1, -1);
+        }, Current.Dispatcher);
+        _trimTimer.Stop();
+        _trimTimer.Start();
     }
 
     public static void Log(Exception ex)

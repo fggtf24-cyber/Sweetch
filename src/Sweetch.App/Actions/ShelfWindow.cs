@@ -107,6 +107,7 @@ internal sealed class ShelfWindow : Window
             Effect = Theme.Shadow(24),
         };
 
+        Closed += (_, _) => App.TrimMemorySoon();
         DragOver += (_, e) =>
         {
             e.Effects = e.Data.GetDataPresent(DataFormats.FileDrop) ? DragDropEffects.Copy : DragDropEffects.None;

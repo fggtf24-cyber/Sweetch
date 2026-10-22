@@ -34,7 +34,7 @@ internal sealed class WheelWindow : Window
     private const double Corner = 11;
     private const double PopOut = 7;
 
-    /// <summary>Room around the disc for its shadow.</summary>
+    /// <summary>Room around the slices for the pop-out.</summary>
     private const double Pad = 16;
     private const double Size = 2 * (OuterRadius + Rim + Pad);
     private static readonly WheelKind[] WheelOrder = [WheelKind.Convert, WheelKind.Tools, WheelKind.Actions];
@@ -244,6 +244,7 @@ internal sealed class WheelWindow : Window
         _finished = true;
         _closeTimer?.Stop();
         Close();
+        App.TrimMemorySoon();
     }
 
     /// <summary>Renders the wheel to a PNG without showing it (used by --self-test).</summary>
@@ -517,19 +518,7 @@ internal sealed class WheelWindow : Window
         _labels.Clear();
         _groups.Clear();
 
-        var disc = OuterRadius + Rim;
-        var backdrop = new Ellipse
-        {
-            Width = 2 * disc,
-            Height = 2 * disc,
-            Fill = Theme.Backdrop,
-            Stroke = Theme.BackdropEdge,
-            StrokeThickness = 1,
-            Effect = Theme.Shadow(28),
-        };
-        Canvas.SetLeft(backdrop, Pad);
-        Canvas.SetTop(backdrop, Pad);
-        _canvas.Children.Add(backdrop);
+        // Bare glass: slices and hub float on their own, no backing disc, no shadows.
 
         var n = _ops.Count;
         var step = n == 0 ? 360 : 360.0 / n;
@@ -584,7 +573,6 @@ internal sealed class WheelWindow : Window
             Fill = Theme.Hub,
             Stroke = Theme.PanelBorder,
             StrokeThickness = 1,
-            Effect = Theme.Shadow(12),
         };
         Canvas.SetLeft(hub, Size / 2 - hubSize / 2);
         Canvas.SetTop(hub, Size / 2 - hubSize / 2);
@@ -604,11 +592,6 @@ internal sealed class WheelWindow : Window
     internal static FrameworkElement Preview(IReadOnlyList<Operation> ops, string title, string detail, ISet<string>? highlight = null)
     {
         var canvas = new Canvas { Width = Size, Height = Size };
-        var disc = OuterRadius + Rim;
-        var backdrop = new Ellipse { Width = 2 * disc, Height = 2 * disc, Fill = Theme.Backdrop, Stroke = Theme.BackdropEdge, StrokeThickness = 1, Effect = Theme.Shadow(28) };
-        Canvas.SetLeft(backdrop, Pad);
-        Canvas.SetTop(backdrop, Pad);
-        canvas.Children.Add(backdrop);
 
         var n = ops.Count;
         var step = n == 0 ? 360 : 360.0 / n;
@@ -646,7 +629,7 @@ internal sealed class WheelWindow : Window
             canvas.Children.Add(new Path { Data = Ring(), Fill = Theme.Slice, Stroke = Theme.SliceEdge, StrokeThickness = 1, Opacity = 0.5 });
 
         var hubSize = 2 * (InnerRadius - 6);
-        var hub = new Ellipse { Width = hubSize, Height = hubSize, Fill = Theme.Hub, Stroke = Theme.PanelBorder, StrokeThickness = 1, Effect = Theme.Shadow(12) };
+        var hub = new Ellipse { Width = hubSize, Height = hubSize, Fill = Theme.Hub, Stroke = Theme.PanelBorder, StrokeThickness = 1 };
         Canvas.SetLeft(hub, Size / 2 - hubSize / 2);
         Canvas.SetTop(hub, Size / 2 - hubSize / 2);
         canvas.Children.Add(hub);
@@ -807,7 +790,6 @@ internal sealed class WheelWindow : Window
         var slice = _slices[index];
         slice.Fill = on ? Theme.AccentGradient : Theme.Slice;
         slice.Stroke = on ? Brushes.Transparent : Theme.SliceEdge;
-        slice.Effect = on ? Theme.Glow() : null;
         foreach (var child in _labels[index].Children.OfType<TextBlock>())
         {
             var subtitle = Equals(child.Tag, "subtitle");

@@ -47,3 +47,45 @@ public class RawTests
         }
     }
 }
+
+public class ConversionQualityTests
+{
+    private static string Sample(string dir, string name, uint quality)
+    {
+        // A noisy gradient: lossy encoders can't hide changes in it.
+        using var image = new MagickImage("plasma:red-blue", 96, 64);
+        image.Quality = quality;
+        var path = Path.Combine(dir, name);
+        image.Write(path);
+        return path;
+    }
+
+    [Fact]
+    public async Task Lossless_source_stays_lossless()
+    {
+        var dir = Directory.CreateTempSubdirectory("sweetch-quality-").FullName;
+        var png = Sample(dir, "in.png", 0);
+        var webp = Path.Combine(dir, "out.webp");
+        await ImageBackend.ConvertAsync(png, webp, "webp", new Settings(), CancellationToken.None);
+        using var a = new MagickImage(png);
+        using var b = new MagickImage(webp);
+        Assert.Equal(0, a.Compare(b, ErrorMetric.Absolute));
+
+        var jpg = Path.Combine(dir, "out.jpg");
+        await ImageBackend.ConvertAsync(png, jpg, "jpg", new Settings(), CancellationToken.None);
+        using var j = new MagickImage(jpg);
+        Assert.Equal(100u, j.Quality);
+    }
+
+    [Fact]
+    public async Task Lossy_source_keeps_its_quality()
+    {
+        var dir = Directory.CreateTempSubdirectory("sweetch-quality-").FullName;
+        var jpg = Sample(dir, "in.jpg", 77);
+        var output = Path.Combine(dir, "out.jpg");
+        // The setting (50) must not win: only the format changes, and JPEG records its quality, unlike WebP.
+        await ImageBackend.ConvertAsync(jpg, output, "jpg", new Settings { JpegQuality = 50 }, CancellationToken.None);
+        using var result = new MagickImage(output);
+        Assert.Equal(77u, result.Quality);
+    }
+}

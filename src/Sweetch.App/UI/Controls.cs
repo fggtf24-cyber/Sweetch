@@ -151,7 +151,7 @@ internal static class Controls
         {
             track.Background = on ? Theme.AccentGradient : Brushes.Transparent;
             track.BorderBrush = on ? Brushes.Transparent : Theme.Muted;
-            knob.Fill = on ? Brushes.White : Theme.Muted;
+            knob.Fill = on ? Theme.TextOnAccent : Theme.Muted;
             var x = on ? 23.0 : 3.0;
             if (animate)
                 translate.BeginAnimation(TranslateTransform.XProperty, new DoubleAnimation(x, TimeSpan.FromMilliseconds(120)) { EasingFunction = new CubicEase() });
