@@ -58,6 +58,11 @@ public class UpdateTests
         Assert.Equal("https://example.com/old.exe",
             UpdateInfo.Parse(Json.Replace("Sweetch-1.2.0-Setup-win-x64.exe\", \"browser_download_url\": \"https://example.com/setup.exe", "Sweetch-Setup-1.2.0.exe\", \"browser_download_url\": \"https://example.com/old.exe"))!.InstallerUrl);
 
+    [Fact]
+    public void Ignores_the_permanent_download_copy() =>
+        Assert.Equal("https://example.com/setup.exe",
+            UpdateInfo.Parse(Json.Replace("\"assets\": [", "\"assets\": [ { \"name\": \"Forma-Setup.exe\", \"browser_download_url\": \"https://example.com/permanent.exe\" },"))!.InstallerUrl);
+
     [Theory]
     [InlineData("1.1.1.0", true)]
     [InlineData("1.2.0.0", false)]

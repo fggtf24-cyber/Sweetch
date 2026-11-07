@@ -36,4 +36,6 @@ $installer = Join-Path $OutputDirectory "Sweetch-$Version-Setup-win-x64.exe"
 if (!(Test-Path -LiteralPath $installer)) { throw 'Installer output was not created.' }
 $hash = (Get-FileHash -LiteralPath $installer -Algorithm SHA256).Hash.ToLowerInvariant()
 "$hash  $(Split-Path $installer -Leaf)" | Out-File -Encoding ascii "$installer.sha256"
+# A fixed name for releases/latest/download links. The updater ignores it and keeps using the versioned file.
+Copy-Item -LiteralPath $installer -Destination (Join-Path $OutputDirectory 'Forma-Setup.exe') -Force
 Write-Output "Installer ready: $installer"

@@ -8,7 +8,7 @@
 
 | Вариант | Скачать | Как запустить |
 | --- | --- | --- |
-| **Установщик EXE** | [Forma — установить](https://github.com/fggtf24-cyber/Sweetch/releases/latest) (`Sweetch-<версия>-Setup-win-x64.exe`) | Запустите установщик. Он добавит программу в меню «Пуск», включит запуск вместе с Windows и позволит удалить её через настройки Windows. |
+| **Установщик EXE** | [Forma — установить](https://github.com/fggtf24-cyber/Sweetch/releases/latest/download/Forma-Setup.exe) (`Forma-Setup.exe`, всегда последняя версия) | Запустите установщик. Он добавит программу в меню «Пуск», включит запуск вместе с Windows и позволит удалить её через настройки Windows. |
 | **Архив ZIP без установки** | [Forma — скачать архив](https://github.com/fggtf24-cyber/Sweetch/releases/latest) | Распакуйте всю папку и запустите `Sweetch.exe`. |
 
 Оба варианта содержат готовую программу, .NET, Pandoc и FFmpeg. Нужна Windows 10 (1809+) или Windows 11, x64. [Все файлы релиза и контрольные суммы SHA-256](https://github.com/fggtf24-cyber/Sweetch/releases/latest). Пункты **Source code** и кнопка **Code → Download ZIP** предназначены для разработчиков и содержат исходники.
@@ -38,7 +38,7 @@
 - USDT · TRC20: `TQHTy7kbk3ngYTUfrTpEeSi3hP38tnqJNU`
 - [Telegram-канал](https://t.me/mmmorozov)
 
-Обновления приходят из релизов GitHub [fggtf24-cyber/Sweetch](https://github.com/fggtf24-cyber/Sweetch/releases): программа дважды в день проверяет, не вышла ли новая версия, и показывает карточку «Обновить / Не сейчас». Установщик скачивается только из этого репозитория, сверяется по размеру и SHA-256, ставится без вопросов, и Forma перезапускается уже обновлённой. Выключается в «Настройки → Обновления». Чтобы выпустить обновление, поднимите `<Version>` в `src/Sweetch.App/Forma.App.csproj`, соберите установщик и приложите `Sweetch-<версия>-Setup-win-x64.exe` к релизу с тегом `v<версия>`. Обратная связь открывает Telegram; встроенной отправки сообщений на сторонний сервер нет.
+Обновления приходят из релизов GitHub [fggtf24-cyber/Sweetch](https://github.com/fggtf24-cyber/Sweetch/releases): программа дважды в день проверяет, не вышла ли новая версия, и показывает карточку «Обновить / Не сейчас». Установщик скачивается только из этого репозитория, сверяется по размеру и SHA-256, ставится без вопросов, и Forma перезапускается уже обновлённой. Выключается в «Настройки → Обновления». Чтобы выпустить обновление, поднимите `<Version>` в `src/Sweetch.App/Forma.App.csproj`, закоммитьте это и отправьте в `main`, затем отправьте тег `v<версия>`: CI соберёт и выложит релиз сам. При выпуске вручную (так вышла 1.2.0) соберите установщик и ZIP, отмените запуск CI для тега и перечислите файлы явно, потому что в `artifacts` могут лежать файлы старых версий: `gh release create v<версия> artifacts/Sweetch-<версия>-Setup-win-x64.exe artifacts/Sweetch-<версия>-Setup-win-x64.exe.sha256 artifacts/Sweetch-<версия>-win-x64.zip artifacts/Sweetch-<версия>-win-x64.zip.sha256 artifacts/Forma-Setup.exe`. `Forma-Setup.exe` — копия установщика с постоянным именем для ссылки `releases/latest/download/Forma-Setup.exe`; её создаёт `scripts/build-installer.ps1`, и без неё в новом релизе эта ссылка перестанет работать. Автообновление использует только файл с версией. Обратная связь открывает Telegram; встроенной отправки сообщений на сторонний сервер нет.
 
 ## Сборка
 
