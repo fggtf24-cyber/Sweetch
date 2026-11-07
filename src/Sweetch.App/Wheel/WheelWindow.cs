@@ -29,14 +29,12 @@ internal sealed class WheelWindow : Window
 
     private const double OuterRadius = 196;
     private const double InnerRadius = 80;
-    private const double Rim = 9;
-    private const double Gap = 6;
-    private const double Corner = 11;
-    private const double PopOut = 7;
+    private const double Gap = 2;
+    private const double Corner = 3;
 
-    /// <summary>Room around the slices for the pop-out.</summary>
-    private const double Pad = 16;
-    private const double Size = 2 * (OuterRadius + Rim + Pad);
+    /// <summary>Room around the slices for their hairline.</summary>
+    private const double Pad = 4;
+    private const double Size = 2 * (OuterRadius + Pad);
     private static readonly WheelKind[] WheelOrder = [WheelKind.Convert, WheelKind.Tools, WheelKind.Actions];
 
     private readonly AppSettings _settings;
@@ -45,13 +43,12 @@ internal sealed class WheelWindow : Window
     private readonly Canvas _canvas = new() { Width = Size, Height = Size };
     private readonly List<Path> _slices = [];
     private readonly List<StackPanel> _labels = [];
-    private readonly List<Canvas> _groups = [];
     private readonly Image _icon = new() { Width = 32, Height = 32, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0, 0, 0, 4) };
     private readonly TextBlock _iconGlyph = new() { FontSize = 24, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0, 0, 0, 6) };
-    private readonly TextBlock _title = HubText(16, FontWeights.SemiBold);
+    private readonly TextBlock _title = HubText(15, FontWeights.Medium);
     private readonly TextBlock _detail = HubText(11.5, FontWeights.Normal);
     private readonly StackPanel _tabs = new() { Orientation = Orientation.Horizontal };
-    private readonly Border _tabTrack = new() { CornerRadius = new CornerRadius(10), Padding = new Thickness(2), HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0, 8, 0, 0) };
+    private readonly Border _tabTrack = new() { CornerRadius = new CornerRadius(6), Padding = new Thickness(2), HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0, 8, 0, 0) };
     private readonly StackPanel _hubContent = new() { Width = InnerRadius * 1.75 };
 
     private IReadOnlyList<FileItem> _items;
@@ -78,7 +75,7 @@ internal sealed class WheelWindow : Window
         _source = source;
         _execute = execute;
 
-        Title = "Sweetch";
+        Title = "Forma";
         WindowStyle = WindowStyle.None;
         AllowsTransparency = true;
         Background = Brushes.Transparent;
@@ -95,8 +92,6 @@ internal sealed class WheelWindow : Window
         FontFamily = Theme.UiFont;
         Focusable = true;
         Content = _canvas;
-        _canvas.RenderTransformOrigin = new Point(0.5, 0.5);
-        _canvas.RenderTransform = new ScaleTransform(0.9, 0.9);
         _tabTrack.Child = _tabs;
         _iconGlyph.FontFamily = Theme.Icons;
         _hubContent.Children.Add(_icon);
@@ -156,13 +151,7 @@ internal sealed class WheelWindow : Window
         _anchor = screenPoint;
         Show();
         PositionAtAnchor();
-        var ease = new CubicEase { EasingMode = EasingMode.EaseOut };
-        var duration = TimeSpan.FromMilliseconds(140);
-        BeginAnimation(OpacityProperty, new DoubleAnimation(0, 1, duration) { EasingFunction = ease });
-        var scale = (ScaleTransform)_canvas.RenderTransform;
-        scale.BeginAnimation(ScaleTransform.ScaleXProperty, new DoubleAnimation(0.9, 1, duration) { EasingFunction = ease });
-        scale.BeginAnimation(ScaleTransform.ScaleYProperty, new DoubleAnimation(0.9, 1, duration) { EasingFunction = ease });
-        AnimateSlicesIn();
+        BeginAnimation(OpacityProperty, new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(100)));
 
         if (Mode == WheelMode.Click)
         {
@@ -193,7 +182,7 @@ internal sealed class WheelWindow : Window
         var scale = (rect.Right - rect.Left) / Size;
         var cx = (rect.Left + rect.Right) / 2.0;
         var cy = (rect.Top + rect.Bottom) / 2.0;
-        var radius = (OuterRadius + Rim) * scale;
+        var radius = OuterRadius * scale;
         return Math.Pow(p.X - cx, 2) + Math.Pow(p.Y - cy, 2) <= radius * radius;
     }
 
@@ -205,7 +194,6 @@ internal sealed class WheelWindow : Window
         _repeat = false;
         LoadOperations();
         Build();
-        AnimateSlicesIn();
         if (Mode == WheelMode.Click && _ops.Count > 0)
             SetHighlight(0);
     }
@@ -223,7 +211,6 @@ internal sealed class WheelWindow : Window
         _repeat = true;
         LoadOperations();
         Build();
-        AnimateSlicesIn();
         if (Mode == WheelMode.Click && _ops.Count > 0)
             SetHighlight(0);
     }
@@ -250,15 +237,6 @@ internal sealed class WheelWindow : Window
     /// <summary>Renders the wheel to a PNG without showing it (used by --self-test).</summary>
     public void RenderPreview(string file, int highlight)
     {
-        _canvas.RenderTransform = Transform.Identity;
-        foreach (var group in _groups)
-        {
-            // Offscreen rendering doesn't advance animations; show the final state.
-            group.BeginAnimation(OpacityProperty, null);
-            var scale = (ScaleTransform)((TransformGroup)group.RenderTransform).Children[0];
-            scale.BeginAnimation(ScaleTransform.ScaleXProperty, null);
-            scale.BeginAnimation(ScaleTransform.ScaleYProperty, null);
-        }
         if (highlight >= 0 && highlight < _ops.Count)
             SetHighlight(highlight);
         Content = null;
@@ -296,7 +274,6 @@ internal sealed class WheelWindow : Window
             _items = preview.Items;
             LoadOperations();
             Build();
-            AnimateSlicesIn();
         }
         _closeTimer?.Stop();
         var index = HitTest(e.GetPosition(_canvas), out _);
@@ -445,7 +422,7 @@ internal sealed class WheelWindow : Window
         var dy = p.Y - Size / 2;
         var r = Math.Sqrt(dx * dx + dy * dy);
         inHub = r < InnerRadius;
-        if (inHub || r > OuterRadius + Rim || _ops.Count == 0)
+        if (inHub || r > OuterRadius || _ops.Count == 0)
             return -1;
         var angle = (Math.Atan2(dx, -dy) * 180 / Math.PI + 360) % 360;
         var step = 360.0 / _ops.Count;
@@ -516,9 +493,6 @@ internal sealed class WheelWindow : Window
         _canvas.Children.Clear();
         _slices.Clear();
         _labels.Clear();
-        _groups.Clear();
-
-        // Bare glass: slices and hub float on their own, no backing disc, no shadows.
 
         var n = _ops.Count;
         var step = n == 0 ? 360 : 360.0 / n;
@@ -551,21 +525,13 @@ internal sealed class WheelWindow : Window
             Canvas.SetLeft(fit, mid.X - fit.DesiredSize.Width / 2);
             Canvas.SetTop(fit, mid.Y - fit.DesiredSize.Height / 2);
 
-            // Slice and label move together when the slice pops out.
-            var group = new Canvas { Width = Size, Height = Size };
-            var transforms = new TransformGroup();
-            transforms.Children.Add(new ScaleTransform(1, 1, Size / 2, Size / 2));
-            transforms.Children.Add(new TranslateTransform());
-            group.RenderTransform = transforms;
-            group.Children.Add(path);
-            group.Children.Add(fit);
             _slices.Add(path);
             _labels.Add(label);
-            _groups.Add(group);
-            _canvas.Children.Add(group);
+            _canvas.Children.Add(path);
+            _canvas.Children.Add(fit);
         }
 
-        var hubSize = 2 * (InnerRadius - 6);
+        var hubSize = 2 * (InnerRadius - Gap);
         var hub = new Ellipse
         {
             Width = hubSize,
@@ -604,7 +570,7 @@ internal sealed class WheelWindow : Window
             canvas.Children.Add(new Path
             {
                 Data = n == 1 ? Ring() : Sector(a0, a0 + step),
-                Fill = on ? Theme.AccentGradient : Theme.Slice,
+                Fill = on ? Theme.Accent : Theme.Slice,
                 Stroke = on ? Brushes.Transparent : Theme.SliceEdge,
                 StrokeThickness = 1,
             });
@@ -628,14 +594,14 @@ internal sealed class WheelWindow : Window
         if (n == 0)
             canvas.Children.Add(new Path { Data = Ring(), Fill = Theme.Slice, Stroke = Theme.SliceEdge, StrokeThickness = 1, Opacity = 0.5 });
 
-        var hubSize = 2 * (InnerRadius - 6);
+        var hubSize = 2 * (InnerRadius - Gap);
         var hub = new Ellipse { Width = hubSize, Height = hubSize, Fill = Theme.Hub, Stroke = Theme.PanelBorder, StrokeThickness = 1 };
         Canvas.SetLeft(hub, Size / 2 - hubSize / 2);
         Canvas.SetTop(hub, Size / 2 - hubSize / 2);
         canvas.Children.Add(hub);
 
         var text = new StackPanel { Width = InnerRadius * 1.75 };
-        var t = HubText(16, FontWeights.SemiBold);
+        var t = HubText(15, FontWeights.Medium);
         t.Text = title;
         t.Foreground = Theme.Text;
         var d = HubText(11.5, FontWeights.Normal);
@@ -650,21 +616,6 @@ internal sealed class WheelWindow : Window
         return new Viewbox { Child = canvas, Stretch = Stretch.Uniform };
     }
 
-    /// <summary>Slices grow out of the centre one after another.</summary>
-    private void AnimateSlicesIn()
-    {
-        var ease = new CubicEase { EasingMode = EasingMode.EaseOut };
-        for (var i = 0; i < _groups.Count; i++)
-        {
-            var delay = TimeSpan.FromMilliseconds(14 * i);
-            var duration = TimeSpan.FromMilliseconds(170);
-            var scale = (ScaleTransform)((TransformGroup)_groups[i].RenderTransform).Children[0];
-            _groups[i].BeginAnimation(OpacityProperty, new DoubleAnimation(0, 1, duration) { BeginTime = delay, EasingFunction = ease });
-            scale.BeginAnimation(ScaleTransform.ScaleXProperty, new DoubleAnimation(0.82, 1, duration) { BeginTime = delay, EasingFunction = ease });
-            scale.BeginAnimation(ScaleTransform.ScaleYProperty, new DoubleAnimation(0.82, 1, duration) { BeginTime = delay, EasingFunction = ease });
-        }
-    }
-
     private static StackPanel SliceLabel(Operation op)
     {
         // Slices that first download a tool are shown a little faded.
@@ -676,7 +627,7 @@ internal sealed class WheelWindow : Window
             {
                 Text = op.Glyph,
                 FontFamily = Theme.Icons,
-                FontSize = 20,
+                FontSize = 18,
                 Foreground = Theme.Text,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 Margin = new Thickness(0, 0, 0, 5),
@@ -686,8 +637,8 @@ internal sealed class WheelWindow : Window
         {
             Text = op.Label,
             FontFamily = Theme.DisplayFont,
-            FontSize = isFormat ? 19 : 13,
-            FontWeight = FontWeights.SemiBold,
+            FontSize = isFormat ? 16 : 12.5,
+            FontWeight = FontWeights.Medium,
             Foreground = Theme.Text,
             TextAlignment = TextAlignment.Center,
             TextWrapping = TextWrapping.Wrap,
@@ -746,16 +697,16 @@ internal sealed class WheelWindow : Window
             var active = wheel == _wheel;
             var tab = new Border
             {
-                CornerRadius = new CornerRadius(8),
+                CornerRadius = new CornerRadius(4),
                 Padding = new Thickness(7, 1, 7, 2),
-                Background = active ? Theme.AccentGradient : Brushes.Transparent,
+                Background = active ? Theme.Accent : Brushes.Transparent,
                 Cursor = Mode == WheelMode.Click ? Cursors.Hand : null,
                 ToolTip = AppSettings.WheelName(wheel),
                 Child = new TextBlock
                 {
                     Text = key == Input.ModifierKey.None ? AppSettings.WheelName(wheel) : AppSettings.KeyName(key),
                     FontSize = 10.5,
-                    FontWeight = FontWeights.SemiBold,
+                    FontWeight = FontWeights.Medium,
                     Foreground = active ? Theme.TextOnAccent : Theme.Muted,
                 },
             };
@@ -788,7 +739,7 @@ internal sealed class WheelWindow : Window
     private void Paint(int index, bool on)
     {
         var slice = _slices[index];
-        slice.Fill = on ? Theme.AccentGradient : Theme.Slice;
+        slice.Fill = on ? Theme.Accent : Theme.Slice;
         slice.Stroke = on ? Brushes.Transparent : Theme.SliceEdge;
         foreach (var child in _labels[index].Children.OfType<TextBlock>())
         {
@@ -797,23 +748,6 @@ internal sealed class WheelWindow : Window
             child.Opacity = on && subtitle ? 0.85 : 1;
         }
 
-        // Pop the slice outwards along its middle angle.
-        var n = _ops.Count;
-        var angle = n <= 1 ? 0 : index * 360.0 / n * Math.PI / 180;
-        var distance = on && n > 1 ? PopOut : 0;
-        var move = (TranslateTransform)((TransformGroup)_groups[index].RenderTransform).Children[1];
-        var duration = TimeSpan.FromMilliseconds(130);
-        var ease = new CubicEase { EasingMode = EasingMode.EaseOut };
-        if (IsVisible)
-        {
-            move.BeginAnimation(TranslateTransform.XProperty, new DoubleAnimation(distance * Math.Sin(angle), duration) { EasingFunction = ease });
-            move.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(-distance * Math.Cos(angle), duration) { EasingFunction = ease });
-        }
-        else
-        {
-            move.X = distance * Math.Sin(angle);
-            move.Y = -distance * Math.Cos(angle);
-        }
     }
 
     private void UpdateHubText()

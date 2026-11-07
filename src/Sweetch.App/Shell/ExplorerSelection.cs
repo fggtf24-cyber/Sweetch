@@ -1,5 +1,6 @@
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Windows;
 using Sweetch.App.Native;
 
@@ -11,6 +12,15 @@ namespace Sweetch.App.Shell;
 /// </summary>
 internal static class ExplorerSelection
 {
+    /// <summary>True for a File Explorer window or the desktop: the only places the wheel opens by itself.</summary>
+    public static bool IsExplorer(IntPtr window)
+    {
+        var name = new StringBuilder(32);
+        return GetClassName(window, name, name.Capacity) > 0 && IsExplorerClass(name.ToString());
+    }
+
+    internal static bool IsExplorerClass(string windowClass) => windowClass is "CabinetWClass" or "ExploreWClass" or "Progman" or "WorkerW";
+
     public static IReadOnlyList<string> Get(IntPtr foreground)
     {
         var fromExplorer = FromExplorer(foreground);
@@ -135,6 +145,9 @@ internal static class ExplorerSelection
 
     [DllImport("user32.dll")]
     private static extern IntPtr GetAncestor(IntPtr hwnd, uint flags);
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    private static extern int GetClassName(IntPtr hwnd, StringBuilder name, int capacity);
 
     [ComImport]
     [Guid("9BA05972-F6A8-11CF-A442-00A0C90A8F39")]

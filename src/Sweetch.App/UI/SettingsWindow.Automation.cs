@@ -92,7 +92,7 @@ internal sealed partial class SettingsWindow
         var question = used.Count == 0
             ? T($"Delete the preset “{preset.Name}”?", $"Удалить шаблон «{preset.Name}»?")
             : T($"The preset “{preset.Name}” is used by {used.Count} watched folder(s); they will be turned off. Delete?", $"Шаблон «{preset.Name}» используется в отслеживаемых папках ({used.Count}). Отслеживание будет отключено. Удалить?");
-        if (MessageBox.Show(this, question, "Sweetch", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+        if (MessageBox.Show(this, question, "Forma", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
             return;
         _settings.Presets.Remove(preset);
         _settings.FavoriteOperations.Remove(id);
@@ -151,10 +151,10 @@ internal sealed partial class SettingsWindow
 
         root.Children.Add(SectionHeader(T("How it works", "Как это работает")));
         root.Children.Add(Card(T("Only new files", "Только новые файлы"),
-            T("A file is processed once it has finished downloading or copying. What was already in the folder stays as it is. Sweetch's own results are not processed again.", "Файл обрабатывается после завершения загрузки или копирования. Уже находившиеся в папке файлы не меняются. Результаты Sweetch не обрабатываются повторно."),
+            T("A file is processed once it has finished downloading or copying. What was already in the folder stays as it is. Forma's own results are not processed again.", "Файл обрабатывается после завершения загрузки или копирования. Уже находившиеся в папке файлы не меняются. Результаты Forma не обрабатываются повторно."),
             null, glyph: ""));
         root.Children.Add(Card(T("Where results go", "Куда сохранять результаты"),
-            T("As set in General → Save results. Originals are never changed. Folders are watched only while Sweetch is running.", "Согласно разделу «Основные → Сохранять результаты». Исходники не изменяются. Папки отслеживаются, пока запущен Sweetch."),
+            T("As set in General → Save results. Originals are never changed. Folders are watched only while Forma is running.", "Согласно разделу «Основные → Сохранять результаты». Исходники не изменяются. Папки отслеживаются, пока запущена Forma."),
             null, glyph: Glyphs.Folder));
     }
 

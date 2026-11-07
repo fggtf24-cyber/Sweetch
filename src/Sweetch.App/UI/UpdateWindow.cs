@@ -9,7 +9,7 @@ using static Sweetch.Core.Loc;
 namespace Sweetch.App.UI;
 
 /// <summary>
-/// "A new version is out": Smooth Cursor's update card on a glass pane. Update downloads with a square
+/// "A new version is out": Smooth Cursor's update card on a flat pane. Update downloads with a square
 /// progress bar and restarts into the new version; Not now skips this version.
 /// </summary>
 internal sealed class UpdateWindow : Window
@@ -28,7 +28,7 @@ internal sealed class UpdateWindow : Window
         _update = update;
         _updater = updater;
         Theme.Refresh();
-        Title = T("Sweetch – update", "Sweetch — обновление");
+        Title = T("Forma – update", "Forma — обновление");
         WindowStyle = WindowStyle.None;
         AllowsTransparency = true;
         Background = Brushes.Transparent;
@@ -47,8 +47,8 @@ internal sealed class UpdateWindow : Window
 
         var head = Headline(T($"Version\n{update.Version} is out.", $"Вышла\nверсия {update.Version}."), 46);
         head.Margin = new Thickness(0, 22, 0, 0);
-        var text = Text(T("Sweetch will close and reopen updated in a few seconds. Your settings stay as they are.",
-            "Sweetch закроется и через пару секунд откроется уже обновлённым. Настройки останутся на месте."), 13, brush: Theme.Muted);
+        var text = Text(T("Forma will close and reopen updated in a few seconds. Your settings stay as they are.",
+            "Forma закроется и через пару секунд откроется уже обновлённой. Настройки останутся на месте."), 13, brush: Theme.Muted);
         text.Margin = new Thickness(0, 14, 0, 20);
 
         var progress = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 18) };
@@ -80,7 +80,7 @@ internal sealed class UpdateWindow : Window
             Background = Theme.Panel,
             BorderBrush = Theme.PanelBorder,
             BorderThickness = new Thickness(1),
-            CornerRadius = new CornerRadius(22),
+            CornerRadius = new CornerRadius(8),
             Padding = new Thickness(36, 28, 36, 26),
             Margin = new Thickness(24),
             Child = body,

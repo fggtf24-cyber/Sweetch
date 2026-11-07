@@ -130,7 +130,7 @@ internal sealed partial class SettingsWindow
             Background = Theme.Card,
             BorderBrush = Theme.PanelBorder,
             BorderThickness = new Thickness(1),
-            CornerRadius = new CornerRadius(14),
+            CornerRadius = new CornerRadius(8),
             Padding = new Thickness(10),
             Child = preview,
         });
@@ -151,7 +151,7 @@ internal sealed partial class SettingsWindow
             Background = Theme.Card,
             BorderBrush = Theme.PanelBorder,
             BorderThickness = new Thickness(1),
-            CornerRadius = new CornerRadius(14),
+            CornerRadius = new CornerRadius(8),
             Padding = new Thickness(6, 4, 6, 4),
             Child = rows,
         });
@@ -174,15 +174,15 @@ internal sealed partial class SettingsWindow
         var row = new DockPanel();
         var badge = new Border
         {
-            CornerRadius = new CornerRadius(9),
+            CornerRadius = new CornerRadius(6),
             MinWidth = 26,
             Padding = new Thickness(7, 1, 7, 2),
-            Background = active ? Theme.AccentGradient : Theme.Track,
+            Background = active ? Theme.Accent : Theme.Track,
             Child = new TextBlock
             {
                 Text = count,
                 FontSize = 11.5,
-                FontWeight = FontWeights.SemiBold,
+                FontWeight = FontWeights.Medium,
                 Foreground = active ? Theme.TextOnAccent : Theme.Muted,
                 HorizontalAlignment = HorizontalAlignment.Center,
             },
@@ -201,11 +201,11 @@ internal sealed partial class SettingsWindow
         };
         DockPanel.SetDock(icon, Dock.Left);
         row.Children.Add(icon);
-        row.Children.Add(Text(name, 14, active ? FontWeights.SemiBold : FontWeights.Normal, wrap: false));
+        row.Children.Add(Text(name, 14, active ? FontWeights.Medium : FontWeights.Normal, wrap: false));
         var item = new Border
         {
             Background = active ? Theme.AccentSoft : Brushes.Transparent,
-            CornerRadius = new CornerRadius(9),
+            CornerRadius = new CornerRadius(6),
             Padding = new Thickness(12, 9, 10, 9),
             Margin = new Thickness(0, 0, 0, 2),
             Cursor = Cursors.Hand,
@@ -280,7 +280,7 @@ internal sealed partial class SettingsWindow
             VerticalAlignment = VerticalAlignment.Center,
         };
         var label = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
-        label.Children.Add(Text(op.Label, 14, isFormat ? FontWeights.SemiBold : FontWeights.Normal, wrap: false));
+        label.Children.Add(Text(op.Label, 14, isFormat ? FontWeights.Medium : FontWeights.Normal, wrap: false));
         if (!string.IsNullOrEmpty(op.Subtitle))
             label.Children.Add(Text(op.Subtitle, 11.5, brush: Theme.Muted, wrap: false));
 

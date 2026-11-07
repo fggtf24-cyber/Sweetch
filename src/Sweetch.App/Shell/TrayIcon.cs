@@ -30,7 +30,7 @@ internal sealed class TrayIcon : IDisposable
         _icon = new Forms.NotifyIcon
         {
             Icon = new System.Drawing.Icon(stream),
-            Text = "Sweetch",
+            Text = "Forma",
             ContextMenuStrip = menu,
             Visible = true,
         };
@@ -62,7 +62,7 @@ internal sealed class TrayIcon : IDisposable
             _icon.ContextMenuStrip.Items.Insert(1, new Forms.ToolStripSeparator());
         }
         Show(T("A new version is available", "Доступна новая версия"),
-            T($"Sweetch {version} – click here to install.", $"Sweetch {version} — нажмите здесь для установки."), false);
+            T($"Forma {version} – click here to install.", $"Forma {version} — нажмите здесь для установки."), false);
         _balloonClick = install;
     }
 

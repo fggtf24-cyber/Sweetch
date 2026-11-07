@@ -66,7 +66,7 @@ internal sealed class WatchFolderDialog : Window
     private void Build()
     {
         var root = new StackPanel { Margin = new Thickness(28, 24, 28, 24) };
-        var title = Text(Title, 24, FontWeights.SemiBold);
+        var title = Text(Title, 24, FontWeights.Medium);
         title.FontFamily = Theme.DisplayFont;
         root.Children.Add(title);
         var intro = Text(T("Every new file that lands in the folder is processed on its own. The originals are never changed.", "Каждый новый файл в папке обрабатывается автоматически. Исходники не изменяются."), 13, brush: Theme.Muted);
@@ -100,7 +100,7 @@ internal sealed class WatchFolderDialog : Window
             Background = Theme.Card,
             BorderBrush = Theme.PanelBorder,
             BorderThickness = new Thickness(1),
-            CornerRadius = new CornerRadius(12),
+            CornerRadius = new CornerRadius(6),
             Padding = new Thickness(6, 4, 6, 4),
             Child = list,
         });
@@ -136,14 +136,14 @@ internal sealed class WatchFolderDialog : Window
     {
         var chip = new Border
         {
-            CornerRadius = new CornerRadius(999),
+            CornerRadius = new CornerRadius(6),
             Padding = new Thickness(14, 6, 14, 7),
             Margin = new Thickness(0, 0, 8, 8),
-            Background = active ? Theme.AccentGradient : Theme.Card,
+            Background = active ? Theme.Accent : Theme.Card,
             BorderBrush = active ? Brushes.Transparent : Theme.PanelBorder,
             BorderThickness = new Thickness(1),
             Cursor = Cursors.Hand,
-            Child = Text(name, 13, active ? FontWeights.SemiBold : FontWeights.Normal, active ? Theme.TextOnAccent : Theme.Text, wrap: false),
+            Child = Text(name, 13, active ? FontWeights.Medium : FontWeights.Normal, active ? Theme.TextOnAccent : Theme.Text, wrap: false),
         };
         chip.MouseLeftButtonUp += (_, _) =>
         {
@@ -166,7 +166,7 @@ internal sealed class WatchFolderDialog : Window
             VerticalAlignment = VerticalAlignment.Center,
         };
         var label = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
-        label.Children.Add(Text(op.Label, 14, selected ? FontWeights.SemiBold : FontWeights.Normal, wrap: false));
+        label.Children.Add(Text(op.Label, 14, selected ? FontWeights.Medium : FontWeights.Normal, wrap: false));
         var detail = AppSettings.WheelName(op.Wheel) + (string.IsNullOrEmpty(op.Subtitle) ? "" : " · " + op.Subtitle);
         label.Children.Add(Text(detail, 11.5, brush: Theme.Muted, wrap: false));
         var row = new DockPanel { Margin = new Thickness(10, 6, 10, 6) };

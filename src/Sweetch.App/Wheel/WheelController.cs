@@ -43,7 +43,7 @@ internal sealed class WheelController
             OpenFor(paths, ExplorerSelection.CursorOrCenter());
         };
 
-        input.IsWheelKey = key => !_settings.Paused && _settings.WheelFor(key) is not null;
+        input.IsWheelKey = key => !_settings.Paused && _settings.WheelFor(key) is not null && InExplorer;
         input.ModifierTapped += OnModifierTapped;
         input.LeftButtonUp += () => _wheel?.OnDragEnded();
         input.MouseDown += point =>
@@ -131,13 +131,19 @@ internal sealed class WheelController
                 open.SwitchTo(wheel);
             return;
         }
-        if (_input.IsDragging)
+        if (_input.IsDragging && InExplorer)
             Open(WheelMode.Drag, wheel, null, _input.Cursor);
     }
 
+    /// <summary>A held button and Shift mean nothing elsewhere: in a game they are aiming and running.</summary>
+    private static bool InExplorer => ExplorerSelection.IsExplorer(Win32.GetForegroundWindow());
+
     public void OnHotkey()
     {
-        var paths = ExplorerSelection.Get(Win32.GetForegroundWindow());
+        var foreground = Win32.GetForegroundWindow();
+        if (!ExplorerSelection.IsExplorer(foreground))
+            return;
+        var paths = ExplorerSelection.Get(foreground);
         if (paths.Count == 0)
         {
             Notifications.Show(T("Nothing selected", "Ничего не выбрано"),

@@ -1,6 +1,6 @@
 # Third-party software
 
-Sweetch uses MIT-licensed code (copyright notices are preserved in [LICENSE](LICENSE)) and the following software. Each component keeps its own license.
+Forma uses MIT-licensed code (copyright notices are preserved in [LICENSE](LICENSE)) and the following software. Each component keeps its own license.
 
 | Component | Used for | License |
 |---|---|---|
@@ -18,4 +18,4 @@ Sweetch uses MIT-licensed code (copyright notices are preserved in [LICENSE](LIC
 
 Pandoc is bundled from the unmodified official Windows distribution. Its `COPYING.rtf`, `COPYRIGHT.txt` and `MANUAL.html` are included in `tools/`. Source release: https://hackage.haskell.org/package/pandoc-3.12.1. The Windows ZIP is verified against SHA-256 `6ef431cb20b2c24a0371fc19200dc49d452be54b1b5c9239f3462841ef53e587` before packaging.
 
-FFmpeg is bundled from the unmodified gyan.dev “essentials” build 9.0.2 (https://github.com/GyanD/codexffmpeg/releases/tag/9.0.2). Its licence and README, which lists the libraries it is built with and their sources, are included in `tools/` as `FFMPEG-LICENSE.txt` and `FFMPEG-README.txt`. The ZIP is verified against SHA-256 `60f467265b1e312373dbcd92200c2618a74850f98d3d078e94296bb3fa2047ba` before packaging. LibreOffice is installed separately. These components run as separate programs; Sweetch invokes them through their command-line interfaces.
+FFmpeg is bundled from the unmodified gyan.dev “essentials” build 9.0.2 (https://github.com/GyanD/codexffmpeg/releases/tag/9.0.2). Its licence and README, which lists the libraries it is built with and their sources, are included in `tools/` as `FFMPEG-LICENSE.txt` and `FFMPEG-README.txt`. The ZIP is verified against SHA-256 `60f467265b1e312373dbcd92200c2618a74850f98d3d078e94296bb3fa2047ba` before packaging. LibreOffice is installed separately. These components run as separate programs; Forma invokes them through their command-line interfaces.

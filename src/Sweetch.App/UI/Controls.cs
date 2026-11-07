@@ -135,14 +135,14 @@ internal static class Controls
             Background = Theme.Card,
             BorderBrush = Theme.PanelBorder,
             BorderThickness = new Thickness(1),
-            CornerRadius = new CornerRadius(10),
+            CornerRadius = new CornerRadius(6),
             Padding = new Thickness(18, 14, 18, 14),
             Margin = new Thickness(0, 0, 0, 4),
             Child = content,
         };
     }
 
-    /// <summary>A row of mutually exclusive pills; the active one is filled with the accent gradient.</summary>
+    /// <summary>A row of mutually exclusive pills; the active one is filled with the accent.</summary>
     public static Border Segmented<T>(IReadOnlyList<(string Label, T Value)> options, T selected, Action<T> changed)
     {
         var panel = new StackPanel { Orientation = Orientation.Horizontal };
@@ -152,9 +152,9 @@ internal static class Controls
             foreach (var (pill, text, v) in pills)
             {
                 var on = EqualityComparer<T>.Default.Equals(v, value);
-                pill.Background = on ? Theme.AccentGradient : Brushes.Transparent;
+                pill.Background = on ? Theme.Accent : Brushes.Transparent;
                 text.Foreground = on ? Theme.TextOnAccent : Theme.Text;
-                text.FontWeight = on ? FontWeights.SemiBold : FontWeights.Normal;
+                text.FontWeight = on ? FontWeights.Medium : FontWeights.Normal;
             }
         }
         foreach (var (label, value) in options)
@@ -162,7 +162,7 @@ internal static class Controls
             var text = new TextBlock { Text = label, FontSize = 12.5, VerticalAlignment = VerticalAlignment.Center };
             var pill = new Border
             {
-                CornerRadius = new CornerRadius(7),
+                CornerRadius = new CornerRadius(4),
                 Padding = new Thickness(12, 5, 12, 6),
                 Background = Brushes.Transparent,
                 Cursor = Cursors.Hand,
@@ -181,7 +181,7 @@ internal static class Controls
         return new Border
         {
             Background = Theme.Track,
-            CornerRadius = new CornerRadius(9),
+            CornerRadius = new CornerRadius(6),
             Padding = new Thickness(2),
             Child = panel,
         };
@@ -205,7 +205,7 @@ internal static class Controls
         var on = value;
         void Paint(bool animate)
         {
-            track.Background = on ? Theme.AccentGradient : Brushes.Transparent;
+            track.Background = on ? Theme.Accent : Brushes.Transparent;
             track.BorderBrush = on ? Brushes.Transparent : Theme.Muted;
             knob.Fill = on ? Theme.TextOnAccent : Theme.Muted;
             var x = on ? 23.0 : 3.0;
@@ -229,19 +229,16 @@ internal static class Controls
     {
         const double width = 200;
         var label = new TextBlock { Width = 40, FontSize = 13, Foreground = Theme.Text, TextAlignment = TextAlignment.Right, VerticalAlignment = VerticalAlignment.Center };
-        var fill = new Border { Height = 4, CornerRadius = new CornerRadius(2), Background = Theme.AccentGradient, HorizontalAlignment = HorizontalAlignment.Left };
+        var fill = new Border { Height = 2, Background = Theme.Accent, HorizontalAlignment = HorizontalAlignment.Left };
         var thumb = new Ellipse
         {
-            Width = 18,
-            Height = 18,
-            Fill = Brushes.White,
-            Stroke = Theme.PanelBorder,
-            StrokeThickness = 1,
+            Width = 14,
+            Height = 14,
+            Fill = Theme.Accent,
             HorizontalAlignment = HorizontalAlignment.Left,
-            Effect = Theme.Shadow(6),
         };
         var surface = new Grid { Width = width, Height = 24, Background = Brushes.Transparent, Cursor = Cursors.Hand };
-        surface.Children.Add(new Border { Height = 4, CornerRadius = new CornerRadius(2), Background = Theme.Track });
+        surface.Children.Add(new Border { Height = 2, Background = Theme.Track });
         surface.Children.Add(fill);
         surface.Children.Add(thumb);
 
@@ -250,12 +247,12 @@ internal static class Controls
         {
             var t = (current - min) / (double)(max - min);
             fill.Width = Math.Max(0, t * width);
-            thumb.Margin = new Thickness(t * (width - 18), 0, 0, 0);
+            thumb.Margin = new Thickness(t * (width - 14), 0, 0, 0);
             label.Text = current.ToString();
         }
         void SetFrom(Point p)
         {
-            var t = Math.Clamp((p.X - 9) / (width - 18), 0, 1);
+            var t = Math.Clamp((p.X - 7) / (width - 14), 0, 1);
             var v = (int)Math.Round(min + t * (max - min));
             if (v == current)
                 return;
@@ -286,7 +283,7 @@ internal static class Controls
         return row;
     }
 
-    /// <summary>A rounded button; <paramref name="primary"/> ones use the accent gradient.</summary>
+    /// <summary>A rounded button; <paramref name="primary"/> ones use the accent.</summary>
     public static Border Button(string text, Action click, bool primary = false, string? glyph = null)
     {
         var content = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Center };
@@ -303,14 +300,14 @@ internal static class Controls
                 Margin = new Thickness(0, 1, 7, 0),
             });
         }
-        content.Children.Add(new TextBlock { Text = text, FontSize = 13, Foreground = foreground, FontWeight = primary ? FontWeights.SemiBold : FontWeights.Normal, VerticalAlignment = VerticalAlignment.Center });
-        var normal = primary ? Theme.AccentGradient : Theme.Card;
+        content.Children.Add(new TextBlock { Text = text, FontSize = 13, Foreground = foreground, FontWeight = primary ? FontWeights.Medium : FontWeights.Normal, VerticalAlignment = VerticalAlignment.Center });
+        var normal = primary ? Theme.Accent : Theme.Card;
         var button = new Border
         {
             Background = normal,
             BorderBrush = primary ? Brushes.Transparent : Theme.PanelBorder,
             BorderThickness = new Thickness(1),
-            CornerRadius = new CornerRadius(8),
+            CornerRadius = new CornerRadius(6),
             Padding = new Thickness(14, 6, 14, 7),
             Cursor = Cursors.Hand,
             Child = content,
@@ -351,9 +348,9 @@ internal static class Controls
     /// <summary>A small coloured status label, e.g. "found" / "missing".</summary>
     public static Border Badge(string text, bool good) => new()
     {
-        CornerRadius = new CornerRadius(6),
+        CornerRadius = new CornerRadius(4),
         Padding = new Thickness(8, 2, 8, 3),
         Background = new SolidColorBrush(Color.FromArgb(0x26, good ? (byte)0x3C : (byte)0xF0, good ? (byte)0xC3 : (byte)0x5A, good ? (byte)0x6E : (byte)0x5A)),
-        Child = new TextBlock { Text = text, FontSize = 11.5, FontWeight = FontWeights.SemiBold, Foreground = good ? Theme.Success : Theme.Error },
+        Child = new TextBlock { Text = text, FontSize = 11.5, FontWeight = FontWeights.Medium, Foreground = good ? Theme.Success : Theme.Error },
     };
 }

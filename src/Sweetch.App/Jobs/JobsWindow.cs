@@ -22,7 +22,7 @@ internal sealed class JobsWindow : Window
 
     public JobsWindow()
     {
-        Title = T("Sweetch – progress", "Sweetch — ход выполнения");
+        Title = T("Forma – progress", "Forma — ход выполнения");
         WindowStyle = WindowStyle.None;
         AllowsTransparency = true;
         Background = Brushes.Transparent;
@@ -73,7 +73,7 @@ internal sealed class JobCard : Border
     /// <summary>Off in the self-test, where offscreen rendering doesn't advance animations.</summary>
     public static bool Animate { get; set; } = true;
 
-    private readonly Border _fill = new() { CornerRadius = new CornerRadius(2), Background = Theme.AccentGradient, HorizontalAlignment = HorizontalAlignment.Left, Width = 0 };
+    private readonly Border _fill = new() { CornerRadius = new CornerRadius(2), Background = Theme.Accent, HorizontalAlignment = HorizontalAlignment.Left, Width = 0 };
     private readonly Grid _bar = new() { Height = 4, Margin = new Thickness(0, 10, 0, 0) };
     private readonly TextBlock _status;
     private readonly StackPanel _buttons;
@@ -90,13 +90,12 @@ internal sealed class JobCard : Border
         Background = Theme.Panel;
         BorderBrush = Theme.PanelBorder;
         BorderThickness = new Thickness(1);
-        CornerRadius = new CornerRadius(14);
+        CornerRadius = new CornerRadius(8);
         Margin = new Thickness(12, 6, 12, 6);
         Padding = new Thickness(16, 14, 12, 14);
-        Effect = Theme.Shadow(22);
 
         var icon = new Grid { Width = 40, Height = 40, Margin = new Thickness(0, 0, 14, 0), VerticalAlignment = VerticalAlignment.Top };
-        icon.Children.Add(new Border { CornerRadius = new CornerRadius(10), Background = Theme.Track });
+        icon.Children.Add(new Border { CornerRadius = new CornerRadius(6), Background = Theme.Track });
         var image = iconPath is null ? null : Sweetch.App.Shell.FileIcons.Get(iconPath);
         if (image is not null)
             icon.Children.Add(new Image { Source = image, Width = 28, Height = 28 });
@@ -114,7 +113,7 @@ internal sealed class JobCard : Border
         icon.Children.Add(badge);
         _badgeHost = badge;
 
-        var titleText = new TextBlock { Text = title, Foreground = Theme.Text, FontFamily = Theme.DisplayFont, FontWeight = FontWeights.SemiBold, FontSize = 14, TextTrimming = TextTrimming.CharacterEllipsis };
+        var titleText = new TextBlock { Text = title, Foreground = Theme.Text, FontFamily = Theme.DisplayFont, FontWeight = FontWeights.Medium, FontSize = 14, TextTrimming = TextTrimming.CharacterEllipsis };
         var detailText = new TextBlock { Text = detail, Foreground = Theme.Muted, FontSize = 12, TextTrimming = TextTrimming.CharacterEllipsis, Margin = new Thickness(0, 2, 0, 0) };
         _bar.Children.Add(new Border { CornerRadius = new CornerRadius(2), Background = Theme.Track });
         _bar.Children.Add(_fill);

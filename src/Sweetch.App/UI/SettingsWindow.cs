@@ -21,7 +21,7 @@ internal enum SettingsPage
     WatchFolders,
     Quality,
     Helpers,
-    About,
+    Updates,
 }
 
 /// <summary>Settings with a sidebar of pages; each page is a column of rounded cards.</summary>
@@ -48,7 +48,7 @@ internal sealed partial class SettingsWindow : Window
         _tools = tools;
         _changed = changed;
         Theme.Refresh();
-        Title = T("Sweetch – settings", "Sweetch — настройки");
+        Title = T("Forma – settings", "Forma — настройки");
         Width = 1180;
         Height = 820;
         MinWidth = 760;
@@ -146,7 +146,7 @@ internal sealed partial class SettingsWindow : Window
                 HelpersPage(page);
                 break;
             default:
-                AboutPage(page);
+                UpdatesPage(page);
                 break;
         }
         _scroll.Content = page;
@@ -166,7 +166,7 @@ internal sealed partial class SettingsWindow : Window
         SettingsPage.WatchFolders => T("Watched folders", "Отслеживаемые папки"),
         SettingsPage.Quality => T("Quality", "Качество"),
         SettingsPage.Helpers => T("Helper programs", "Доп. программы"),
-        _ => T("About", "О приложении"),
+        _ => T("Settings", "Настройки"),
     };
 
     private static string PageGlyph(SettingsPage page) => page switch
@@ -178,7 +178,7 @@ internal sealed partial class SettingsWindow : Window
         SettingsPage.WatchFolders => "",
         SettingsPage.Quality => "",
         SettingsPage.Helpers => "",
-        _ => "",
+        _ => "",
     };
 
     // ------------------------------------------------------------------ sidebar
@@ -197,7 +197,7 @@ internal sealed partial class SettingsWindow : Window
         };
         brand.Children.Add(logo);
         var names = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
-        var name = Text("Sweetch", 19, FontWeights.SemiBold);
+        var name = Text("Forma", 19, FontWeights.Medium);
         name.FontFamily = Theme.DisplayFont;
         names.Children.Add(name);
         names.Children.Add(Text(T("A new shape for your files.", "Новая форма ваших файлов."), 12, brush: Theme.Muted));
@@ -209,11 +209,6 @@ internal sealed partial class SettingsWindow : Window
         version.Margin = new Thickness(10, 12, 0, 0);
         DockPanel.SetDock(version, Dock.Bottom);
         dock.Children.Add(version);
-        var support = Button(T("Support the project", "Поддержать проект"), () => Page = SettingsPage.About, primary: true, glyph: "");
-        support.Margin = new Thickness(6, 10, 6, 8);
-        DockPanel.SetDock(support, Dock.Bottom);
-        dock.Children.Add(support);
-
         var nav = new StackPanel();
         foreach (var page in Enum.GetValues<SettingsPage>())
             nav.Children.Add(NavItem(page));
@@ -241,11 +236,11 @@ internal sealed partial class SettingsWindow : Window
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(0, 0, 14, 0),
         });
-        row.Children.Add(Text(PageName(page), 14, active ? FontWeights.SemiBold : FontWeights.Normal, wrap: false));
+        row.Children.Add(Text(PageName(page), 14, active ? FontWeights.Medium : FontWeights.Normal, wrap: false));
         var item = new Border
         {
             Background = active ? Theme.AccentSoft : System.Windows.Media.Brushes.Transparent,
-            CornerRadius = new CornerRadius(9),
+            CornerRadius = new CornerRadius(6),
             Padding = new Thickness(14, 10, 14, 10),
             Margin = new Thickness(0, 0, 0, 3),
             Cursor = Cursors.Hand,
@@ -284,7 +279,7 @@ internal sealed partial class SettingsWindow : Window
                     _settings.Language = value;
                     Save();
                     // Rebuild the window in the new language.
-                    Title = T("Sweetch – settings", "Sweetch — настройки");
+                    Title = T("Forma – settings", "Forma — настройки");
                     Rebuild();
                 }),
             glyph: ""));
@@ -341,7 +336,7 @@ internal sealed partial class SettingsWindow : Window
         root.Children.Add(SectionHeader(T("System", "Система")));
         root.Children.Add(Card(T("Start when I sign in", "Запускать при входе в систему"), null,
             Toggle(ShellIntegration.IsAutostartEnabled, v => Apply(() => ShellIntegration.SetAutostart(v))), glyph: ""));
-        root.Children.Add(Card(T("File Explorer context menu", "Контекстное меню Проводника"), T("A “Sweetch…” item on right-click", "Пункт «Sweetch…» при нажатии правой кнопкой"),
+        root.Children.Add(Card(T("File Explorer context menu", "Контекстное меню Проводника"), T("A “Forma…” item on right-click", "Пункт «Forma…» при нажатии правой кнопкой"),
             Toggle(ShellIntegration.IsContextMenuEnabled, v => Apply(() => ShellIntegration.SetContextMenu(v))), glyph: ""));
     }
 
@@ -408,7 +403,7 @@ internal sealed partial class SettingsWindow : Window
 
     private void HelpersPage(Panel root)
     {
-        PageHeader(root, PageName(SettingsPage.Helpers), T("Programs Sweetch uses for audio, video and documents.", "Программы для обработки аудио, видео и документов в Sweetch."));
+        PageHeader(root, PageName(SettingsPage.Helpers), T("Programs Forma uses for audio, video and documents.", "Программы для обработки аудио, видео и документов в Forma."));
         root.Children.Add(SectionHeader(T("Built in", "Встроено")));
         root.Children.Add(Card(T("Built in", "Встроено"),
             T("Images, PDFs, spreadsheets, subtitles and archives. Pandoc for documents is included. Audio and video need FFmpeg; some Office conversions need LibreOffice.", "Изображения, PDF, таблицы, субтитры и архивы. Pandoc для документов уже включён. Для аудио и видео нужен FFmpeg; для части операций Office — LibreOffice."),
@@ -485,7 +480,7 @@ internal sealed partial class SettingsWindow : Window
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, ex.Message, "Sweetch", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(this, ex.Message, "Forma", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
     }
 
@@ -494,8 +489,8 @@ internal sealed partial class SettingsWindow : Window
         var path = _tools.Find(tool);
         if (tool == ExternalTool.Pandoc)
             return Card("Pandoc 3.12.1", path is null
-                ? T("Extract the entire Sweetch archive, including the tools folder.", "Распакуйте архив Sweetch целиком, включая папку tools.")
-                : T("Included with Sweetch. Document conversions work without downloading Pandoc.", "Включён в Sweetch. Конвертация документов работает без скачивания Pandoc."),
+                ? T("Extract the entire Forma archive, including the tools folder.", "Распакуйте архив Forma целиком, включая папку tools.")
+                : T("Included with Forma. Document conversions work without downloading Pandoc.", "Включён в Forma. Конвертация документов работает без скачивания Pandoc."),
                 Badge(path is null ? T("missing", "отсутствует") : T("included", "в комплекте"), path is not null), glyph: Glyphs.Document);
         var description = path ?? tool switch
         {
@@ -524,12 +519,12 @@ internal sealed partial class SettingsWindow : Window
                 try
                 {
                     Process.Start(new ProcessStartInfo("cmd.exe",
-                        $"/c winget install -e --id {id} --accept-source-agreements --accept-package-agreements & echo. & echo {T("Done. Click Check again in Sweetch.", "Готово. Нажмите «Проверить снова» в Sweetch.")} & pause")
+                        $"/c winget install -e --id {id} --accept-source-agreements --accept-package-agreements & echo. & echo {T("Done. Click Check again in Forma.", "Готово. Нажмите «Проверить снова» в Forma.")} & pause")
                     { UseShellExecute = true });
                 }
                 catch (System.ComponentModel.Win32Exception ex)
                 {
-                    MessageBox.Show(this, ex.Message, "Sweetch", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show(this, ex.Message, "Forma", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
             }, primary: true, glyph: "");
             install.Margin = new Thickness(10, 0, 0, 0);

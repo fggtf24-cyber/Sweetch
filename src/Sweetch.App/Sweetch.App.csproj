@@ -15,7 +15,7 @@
     <ApplicationIcon>Assets\Sweetch.ico</ApplicationIcon>
     <StartupObject>Sweetch.App.Program</StartupObject>
     <EnableDefaultApplicationDefinition>false</EnableDefaultApplicationDefinition>
-    <Version>1.1.0</Version>
+    <Version>1.2.0</Version>
     <SatelliteResourceLanguages>en;ru</SatelliteResourceLanguages>
     <!-- A tray app: no background GC thread and its extra heap reservations. -->
     <ConcurrentGarbageCollection>false</ConcurrentGarbageCollection>
@@ -25,10 +25,11 @@
     -->
     <!-- Explorer selection and Outlook drops use classic COM, which trimming turns off by default. -->
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
-    <Product>Sweetch</Product>
+    <Product>Forma</Product>
+    <AssemblyTitle>Forma</AssemblyTitle>
     <Authors>mmmorozov</Authors>
     <Company>mmmorozov</Company>
-    <Copyright>Sweetch modifications © 2026 mmmorozov. Third-party notices included.</Copyright>
+    <Copyright>Forma modifications © 2026 mmmorozov. Third-party notices included.</Copyright>
     <Description>Конвертация файлов через круговое меню</Description>
     <!-- ThemeMode (Fluent) is still marked experimental. -->
     <NoWarn>$(NoWarn);WPF0001;WFO0003</NoWarn>

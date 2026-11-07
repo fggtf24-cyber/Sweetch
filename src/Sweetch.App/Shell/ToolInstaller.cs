@@ -30,7 +30,7 @@ internal static class ToolInstaller
         var (url, sha256, exeName) = tool switch
         {
             ExternalTool.Ffmpeg => (FfmpegUrl, (await Http.GetStringAsync(FfmpegUrl + ".sha256", ct)).Trim().Split(' ', '\t', '\n')[0].ToLowerInvariant(), "ffmpeg.exe"),
-            ExternalTool.Pandoc => throw new ConversionException(T("Pandoc is included with Sweetch. Please extract the entire app archive, including the tools folder.", "Pandoc включён в Sweetch. Распакуйте архив приложения целиком, включая папку tools.")),
+            ExternalTool.Pandoc => throw new ConversionException(T("Pandoc is included with Forma. Please extract the entire app archive, including the tools folder.", "Pandoc включён в Forma. Распакуйте архив приложения целиком, включая папку tools.")),
             _ => throw new ConversionException(T("This tool is installed separately.", "Этот инструмент устанавливается отдельно.")),
         };
 

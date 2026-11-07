@@ -118,7 +118,7 @@ internal sealed class FolderWatcher : IDisposable
         {
             var missing = string.Join(", ", op.Requires.Where(t => !_tools.Has(t)).Select(ToolLocator.DisplayName));
             Warn(folder.Path + "|tools", T("Watched folder", "Отслеживаемая папка"),
-                T($"“{op.Label}” needs {missing}. Convert anything once through the wheel and Sweetch will download it.", $"Для «{op.Label}» требуется {missing}. Выполните любую конвертацию через круговое меню, и Sweetch скачает нужный инструмент."));
+                T($"“{op.Label}” needs {missing}. Convert anything once through the wheel and Forma will download it.", $"Для «{op.Label}» требуется {missing}. Выполните любую конвертацию через круговое меню, и Forma скачает нужный инструмент."));
             return;
         }
         _jobs.Start(op, items, null, automatic: true);

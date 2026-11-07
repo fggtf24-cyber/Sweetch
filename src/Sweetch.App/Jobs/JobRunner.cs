@@ -104,7 +104,7 @@ internal sealed class JobRunner(AppSettings settings, ToolLocator tools)
             var owner = ForegroundHelper.Host();
             var answer = System.Windows.MessageBox.Show(owner,
                 T($"This conversion needs {names} ({size} download). Download it now? It's a one-time step.", $"Для конвертации требуется {names} (загрузка {size}). Скачать сейчас? Это нужно сделать только один раз."),
-                "Sweetch", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question);
+                "Forma", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question);
             owner.Close();
             if (answer != System.Windows.MessageBoxResult.Yes)
                 return false;

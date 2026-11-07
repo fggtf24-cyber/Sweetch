@@ -28,7 +28,7 @@ internal sealed class ParameterDialog : Window
         stack.Children.Add(new TextBlock
         {
             Text = items.Count == 1 ? items[0].Name : Items(items.Count),
-            FontWeight = FontWeights.SemiBold,
+            FontWeight = FontWeights.Medium,
             Margin = new Thickness(0, 0, 0, 12),
             TextTrimming = TextTrimming.CharacterEllipsis,
             MaxWidth = 420,

@@ -37,7 +37,7 @@ internal static class ForegroundHelper
             ShowInTaskbar = false,
             ResizeMode = ResizeMode.NoResize,
             Topmost = true,
-            Title = "Sweetch",
+            Title = "Forma",
         };
         host.Show();
         var hwnd = new WindowInteropHelper(host).Handle;

@@ -80,7 +80,7 @@ internal sealed class App : Application
         }
         catch (InvalidOperationException ex)
         {
-            MessageBox.Show(ex.Message, "Sweetch", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(ex.Message, "Forma", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
 
         _controller = new WheelController(_settings, _tools, jobs, _input);
@@ -114,11 +114,11 @@ internal sealed class App : Application
         }
         else if (_args.Contains("--updated"))
         {
-            _tray.Show(T("Sweetch was updated", "Sweetch обновлён"), T($"Version {Updater.Current}", $"Версия {Updater.Current}"), false);
+            _tray.Show(T("Forma was updated", "Forma обновлена"), T($"Version {Updater.Current}", $"Версия {Updater.Current}"), false);
         }
         else if (!_args.Contains("--background"))
         {
-            _tray.Show(T("Sweetch is running", "Sweetch запущен"), T("Grab a file, tap Shift while dragging and drop it on a format.", "Перетащите файл, нажмите Shift и отпустите его над нужным форматом."), false);
+            _tray.Show(T("Forma is running", "Forma запущена"), T("Grab a file, tap Shift while dragging and drop it on a format.", "Перетащите файл, нажмите Shift и отпустите его над нужным форматом."), false);
         }
         HandleArgs(_args);
         TrimMemorySoon();
@@ -213,7 +213,7 @@ internal sealed class App : Application
             SettingsWindow.RefreshIfOpen();
             var now = AppSettings.HotkeyName(preset);
             Notifications.Show(T("Shortcut changed", "Сочетание клавиш изменено"),
-                T($"{taken} is used by another app, so Sweetch now uses {now}. You can change it in Settings.", $"{taken} используется другим приложением, поэтому Sweetch теперь использует {now}. Это можно изменить в настройках."));
+                T($"{taken} is used by another app, so Forma now uses {now}. You can change it in Settings.", $"{taken} используется другим приложением, поэтому Forma теперь использует {now}. Это можно изменить в настройках."));
             return;
         }
 
@@ -236,7 +236,7 @@ internal sealed class App : Application
         var hotkey = AppSettings.HotkeyName(_settings.Hotkey);
         var text = T(
             $"""
-            1. Grab a file with the mouse (in File Explorer, on the desktop, an image in your browser, an Outlook attachment…).
+            1. Grab a file with the mouse in File Explorer or on the desktop.
             2. While dragging, tap a key:
                  {convert} – convert to another format
                  {tools} – tools (compress, shrink, trim, merge…)
@@ -246,14 +246,14 @@ internal sealed class App : Application
             The wheel stays open until you drop; you can release the key and tap another one to switch wheels.
             Tap the same key again to "repeat the last action".
 
-            Without the mouse: select files in File Explorer (or copy a file or a screenshot) and press {hotkey}.
+            Without the mouse: in File Explorer, select files (or copy a file or a screenshot) and press {hotkey}.
             Arrows pick a slice, Enter runs it, Tab switches wheels, Esc closes.
-            Also via right-click → “Sweetch…”.
+            Also via right-click → “Forma…”.
 
             The result is saved next to the original file; the original stays untouched.
             """,
             $"""
-            1. Возьмите файл мышью: в Проводнике, на рабочем столе, изображение в браузере или вложение Outlook.
+            1. Возьмите файл мышью в Проводнике или на рабочем столе.
             2. При перетаскивании нажмите клавишу:
                  {convert} — конвертация в другой формат
                  {tools} — инструменты: сжатие, уменьшение, обрезка, объединение
@@ -263,20 +263,20 @@ internal sealed class App : Application
             Меню остаётся открытым, пока вы не отпустите файл. Можно отпустить клавишу и нажать другую для смены меню.
             Повторное нажатие той же клавиши повторяет последнее действие.
 
-            Без мыши: выберите файлы в Проводнике (или скопируйте файл либо снимок экрана) и нажмите {hotkey}.
+            Без мыши: в Проводнике выберите файлы (или скопируйте файл либо снимок экрана) и нажмите {hotkey}.
             Стрелки — выбор сектора, Enter — запуск, Tab — смена меню, Esc — закрыть.
-            Также можно нажать правой кнопкой → «Sweetch…».
+            Также можно нажать правой кнопкой → «Forma…».
 
             Результат сохраняется рядом с исходным файлом. Исходник не изменяется.
             """);
-        MessageBox.Show(text, T("How Sweetch works", "Как работает Sweetch"), MessageBoxButton.OK, MessageBoxImage.Information);
+        MessageBox.Show(text, T("How Forma works", "Как работает Forma"), MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
     private void OnUnhandled(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
         Log(e.Exception);
         e.Handled = true;
-        Notifications.Show(T("Sweetch – error", "Sweetch — ошибка"), e.Exception.Message, error: true);
+        Notifications.Show(T("Forma – error", "Forma — ошибка"), e.Exception.Message, error: true);
     }
 
     private static DispatcherTimer? _trimTimer;

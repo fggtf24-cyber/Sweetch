@@ -63,7 +63,7 @@ internal sealed class PresetDialog : Window
     private void Build()
     {
         var root = new StackPanel { Margin = new Thickness(28, 24, 28, 24) };
-        var title = Text(Title, 24, FontWeights.SemiBold);
+        var title = Text(Title, 24, FontWeights.Medium);
         title.FontFamily = Theme.DisplayFont;
         root.Children.Add(title);
         var intro = Text(T("A slice of your own with fixed settings. Format changes appear on the Convert wheel, same-format edits on the Tools wheel.", "Свой сектор с фиксированными настройками. Смена формата появится в меню конвертации, правки без смены формата — в инструментах."),

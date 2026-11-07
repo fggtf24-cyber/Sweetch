@@ -27,8 +27,7 @@ internal static class SelfTest
             _ = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
             JobCard.Animate = false;
             Check(Enum.GetValues<Language>().Length == 2, "only English and Russian languages");
-            Check(Brand.Trc20 == "TQHTy7kbk3ngYTUfrTpEeSi3hP38tnqJNU", "TRC20 support address");
-            Check(Brand.DonatePay == "https://donatepay.ru/don/1539048" && Brand.Channel == "https://t.me/mmmorozov", "project links");
+            Check(Brand.Channel == "https://t.me/mmmorozov", "project links");
             // Constructing the updater must not touch the network; checks start only from the running app.
             var updater = new Shell.Updater();
             Check(updater.LastChecked is null && updater.Available is null && Shell.Updater.Repo == "fggtf24-cyber/Sweetch", "updater idle until started");
@@ -211,6 +210,9 @@ internal static class SelfTest
     /// <summary>Reading the Explorer selection goes through late-bound COM, which trimming could break.</summary>
     private static void TestExplorerCom(string outDir, List<string> log)
     {
+        Check(Shell.ExplorerSelection.IsExplorerClass("CabinetWClass") && Shell.ExplorerSelection.IsExplorerClass("Progman"), "wheel opens in Explorer and on the desktop");
+        Check(Shell.ExplorerSelection.IsExplorer(FindWindow("Progman", null)) && !Shell.ExplorerSelection.IsExplorer(FindWindow("Shell_TrayWnd", null)), "window class is read from real windows");
+        Check(!Shell.ExplorerSelection.IsExplorerClass("UnrealWindow") && !Shell.ExplorerSelection.IsExplorerClass("UnityWndClass") && !Shell.ExplorerSelection.IsExplorerClass("Chrome_WidgetWin_1"), "wheel stays closed in games and other apps");
         var file = Path.Combine(outDir, "smoke", "smoke.jpg");
         using (System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{file}\"")) { }
         for (var attempt = 0; attempt < 40; attempt++)
