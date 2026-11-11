@@ -31,7 +31,7 @@ internal static class KnownFolders
     {
         get
         {
-            var dir = Path.Combine(Downloads, "Sweetch");
+            var dir = Path.Combine(Downloads, "Forma");
             Directory.CreateDirectory(dir);
             return dir;
         }

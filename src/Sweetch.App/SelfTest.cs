@@ -179,7 +179,7 @@ internal static class SelfTest
         Check(back.Hotkey == HotkeyPreset.CtrlAltW && back.FavoriteOperations.Single() == "image.to.webp" && back.Language == Language.Russian, "settings JSON round trip");
         Check(json.Contains("\"CtrlAltW\""), "enums stored as names");
         Check(back.Appearance == AppAppearance.Light, "theme setting round trip");
-        Check(AppSettings.Folder.EndsWith("Sweetch") && new AppSettings().AutoUpdate, "isolated settings and automatic updates on by default");
+        Check(AppSettings.Folder.EndsWith("Forma") && new AppSettings().AutoUpdate, "isolated settings and automatic updates on by default");
         log.Add("ok settings json");
     }
 

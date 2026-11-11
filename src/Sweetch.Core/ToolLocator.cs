@@ -11,7 +11,7 @@ public sealed class ToolLocator
     private readonly HashSet<ExternalTool> _assumed = [];
 
     /// <summary>Where the Windows app downloads FFmpeg and Pandoc when they are needed.</summary>
-    public static string DownloadFolder => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sweetch", "tools");
+    public static string DownloadFolder => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Forma", "tools");
 
     /// <summary>A view that pretends <paramref name="tools"/> are installed: "would this work after downloading X?"</summary>
     public ToolLocator Assuming(IEnumerable<ExternalTool> tools)

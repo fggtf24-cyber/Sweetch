@@ -9,14 +9,14 @@
 #endif
 
 [Setup]
-AppId={{CD496C86-0CF4-47DB-BFAA-2BBEA538846B}
+AppId={{7208B1D9-0975-47EB-82C8-13526FD93FF3}
 AppName=Forma
 AppVersion={#AppVersion}
 AppVerName=Forma {#AppVersion}
 AppPublisher=mmmorozov
 AppPublisherURL=https://t.me/mmmorozov
 AppSupportURL=https://github.com/krllmrzv/Sweetch/issues
-DefaultDirName={localappdata}\Programs\Sweetch
+DefaultDirName={localappdata}\Programs\Forma
 DefaultGroupName=Forma
 DisableProgramGroupPage=yes
 PrivilegesRequired=lowest
@@ -54,16 +54,16 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 ; The same entries the app's own switches write (Shell/ShellIntegration.cs), so the two agree. Set here so a
 ; reinstall over old settings still gets them; the app keeps them pointed at its exe, --unregister removes them.
 [Registry]
-Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "Sweetch"; ValueData: """{app}\Sweetch.exe"" --background"; Flags: uninsdeletevalue; Tasks: autostart
-Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run"; ValueType: none; ValueName: "Sweetch"; Flags: deletevalue; Tasks: autostart
-Root: HKCU; Subkey: "Software\Classes\*\shell\Sweetch"; ValueType: string; ValueName: ""; ValueData: "Forma…"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "Software\Classes\*\shell\Sweetch"; ValueType: string; ValueName: "Icon"; ValueData: """{app}\Sweetch.exe"",0"; Tasks: contextmenu
-Root: HKCU; Subkey: "Software\Classes\*\shell\Sweetch"; ValueType: string; ValueName: "MultiSelectModel"; ValueData: "Player"; Tasks: contextmenu
-Root: HKCU; Subkey: "Software\Classes\*\shell\Sweetch\command"; ValueType: string; ValueName: ""; ValueData: """{app}\Sweetch.exe"" --wheel ""%1"""; Tasks: contextmenu
-Root: HKCU; Subkey: "Software\Classes\Directory\shell\Sweetch"; ValueType: string; ValueName: ""; ValueData: "Forma…"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "Software\Classes\Directory\shell\Sweetch"; ValueType: string; ValueName: "Icon"; ValueData: """{app}\Sweetch.exe"",0"; Tasks: contextmenu
-Root: HKCU; Subkey: "Software\Classes\Directory\shell\Sweetch"; ValueType: string; ValueName: "MultiSelectModel"; ValueData: "Player"; Tasks: contextmenu
-Root: HKCU; Subkey: "Software\Classes\Directory\shell\Sweetch\command"; ValueType: string; ValueName: ""; ValueData: """{app}\Sweetch.exe"" --wheel ""%1"""; Tasks: contextmenu
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "Forma"; ValueData: """{app}\Sweetch.exe"" --background"; Flags: uninsdeletevalue; Tasks: autostart; Check: KeepAutostart
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run"; ValueType: none; ValueName: "Forma"; Flags: deletevalue; Tasks: autostart; Check: KeepAutostart
+Root: HKCU; Subkey: "Software\Classes\*\shell\Forma"; ValueType: string; ValueName: ""; ValueData: "Forma…"; Flags: uninsdeletekey; Tasks: contextmenu; Check: KeepContextMenu
+Root: HKCU; Subkey: "Software\Classes\*\shell\Forma"; ValueType: string; ValueName: "Icon"; ValueData: """{app}\Sweetch.exe"",0"; Tasks: contextmenu; Check: KeepContextMenu
+Root: HKCU; Subkey: "Software\Classes\*\shell\Forma"; ValueType: string; ValueName: "MultiSelectModel"; ValueData: "Player"; Tasks: contextmenu; Check: KeepContextMenu
+Root: HKCU; Subkey: "Software\Classes\*\shell\Forma\command"; ValueType: string; ValueName: ""; ValueData: """{app}\Sweetch.exe"" --wheel ""%1"""; Tasks: contextmenu; Check: KeepContextMenu
+Root: HKCU; Subkey: "Software\Classes\Directory\shell\Forma"; ValueType: string; ValueName: ""; ValueData: "Forma…"; Flags: uninsdeletekey; Tasks: contextmenu; Check: KeepContextMenu
+Root: HKCU; Subkey: "Software\Classes\Directory\shell\Forma"; ValueType: string; ValueName: "Icon"; ValueData: """{app}\Sweetch.exe"",0"; Tasks: contextmenu; Check: KeepContextMenu
+Root: HKCU; Subkey: "Software\Classes\Directory\shell\Forma"; ValueType: string; ValueName: "MultiSelectModel"; ValueData: "Player"; Tasks: contextmenu; Check: KeepContextMenu
+Root: HKCU; Subkey: "Software\Classes\Directory\shell\Forma\command"; ValueType: string; ValueName: ""; ValueData: """{app}\Sweetch.exe"" --wheel ""%1"""; Tasks: contextmenu; Check: KeepContextMenu
 
 [Files]
 Source: "{#PublishDir}\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs ignoreversion
@@ -83,9 +83,63 @@ Filename: "{app}\Sweetch.exe"; Description: "{cm:LaunchProgram,Forma}"; Flags: n
 Filename: "{app}\Sweetch.exe"; Parameters: "--updated"; Flags: nowait; Check: IsAppUpdate
 
 [Code]
+const
+  // Forma 1.2.0 was installed under the original Sweetch's AppId and folder.
+  OldKey = 'Software\Microsoft\Windows\CurrentVersion\Uninstall\{CD496C86-0CF4-47DB-BFAA-2BBEA538846B}_is1';
+
+var
+  Migrated, OldAutostart, OldContextMenu: Boolean;
+
 function IsAppUpdate: Boolean;
 begin
   Result := ExpandConstant('{param:UPDATED|0}') = '1';
+end;
+
+// Coming from 1.2.0, keep what the user had chosen there instead of this installer's defaults.
+function KeepAutostart: Boolean;
+begin
+  Result := not Migrated or OldAutostart;
+end;
+
+function KeepContextMenu: Boolean;
+begin
+  Result := not Migrated or OldContextMenu;
+end;
+
+function PointsTo(const Key, Name, Dir: String): Boolean;
+var
+  Value: String;
+begin
+  Result := RegQueryStringValue(HKCU, Key, Name, Value) and (Pos(Lowercase(Dir), Lowercase(Value)) > 0);
+end;
+
+// Removes Forma 1.2.0. An entry under that AppId named anything else is the original Sweetch and stays.
+function PrepareToInstall(var NeedsRestart: Boolean): String;
+var
+  Name, Dir, Uninstaller, Quoted: String;
+  Code, Tries: Integer;
+begin
+  Result := '';
+  if not (RegQueryStringValue(HKCU, OldKey, 'DisplayName', Name) and (Name = 'Forma')
+      and RegQueryStringValue(HKCU, OldKey, 'InstallLocation', Dir)
+      and RegQueryStringValue(HKCU, OldKey, 'UninstallString', Uninstaller)) then
+    Exit;
+  Dir := RemoveBackslash(Dir);
+  OldAutostart := PointsTo('Software\Microsoft\Windows\CurrentVersion\Run', 'Sweetch', Dir);
+  OldContextMenu := PointsTo('Software\Classes\*\shell\Sweetch\command', '', Dir);
+  Quoted := Dir;
+  StringChangeEx(Quoted, '''', '''''', True);
+  Exec('powershell.exe', '-NoProfile -Command "Get-Process Sweetch -ErrorAction SilentlyContinue | Where-Object { $_.Path -like ''' + Quoted + '\*'' } | Stop-Process -Force"',
+    '', SW_HIDE, ewWaitUntilTerminated, Code);
+  Exec(RemoveQuotes(Uninstaller), '/VERYSILENT /SUPPRESSMSGBOXES /NORESTART', '', SW_HIDE, ewWaitUntilTerminated, Code);
+  // The uninstaller hands over to a copy of itself and returns at once; wait for it to finish.
+  Tries := 0;
+  while RegKeyExists(HKCU, OldKey) and (Tries < 120) do
+  begin
+    Sleep(500);
+    Tries := Tries + 1;
+  end;
+  Migrated := True;
 end;
 
 [UninstallRun]

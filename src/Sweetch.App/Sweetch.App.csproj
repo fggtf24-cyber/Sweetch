@@ -15,7 +15,7 @@
     <ApplicationIcon>Assets\Sweetch.ico</ApplicationIcon>
     <StartupObject>Sweetch.App.Program</StartupObject>
     <EnableDefaultApplicationDefinition>false</EnableDefaultApplicationDefinition>
-    <Version>1.2.0</Version>
+    <Version>1.2.1</Version>
     <SatelliteResourceLanguages>en;ru</SatelliteResourceLanguages>
     <!-- A tray app: no background GC thread and its extra heap reservations. -->
     <ConcurrentGarbageCollection>false</ConcurrentGarbageCollection>

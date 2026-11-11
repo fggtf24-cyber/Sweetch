@@ -13,7 +13,7 @@ namespace Sweetch.App.Shell;
 internal sealed class SingleInstance : IDisposable
 {
     // Pipe names are machine-wide, so include the user; string.GetHashCode is randomized per process.
-    private static readonly string Id = "Sweetch-" + new string(Environment.UserName.Select(c => char.IsLetterOrDigit(c) ? c : '_').ToArray());
+    private static readonly string Id = "Forma-" + new string(Environment.UserName.Select(c => char.IsLetterOrDigit(c) ? c : '_').ToArray());
     private readonly Mutex _mutex;
     private readonly CancellationTokenSource _cts = new();
 

@@ -21,7 +21,10 @@ public enum HotkeyPreset
 /// <summary>User preferences, stored as JSON in %APPDATA%\Sweetch\settings.json.</summary>
 public sealed class AppSettings
 {
-    public static string Folder { get; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Sweetch");
+    public static string Folder { get; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Forma");
+
+    /// <summary>Forma 1.2.0 and older kept their settings in Sweetch's folder; read once, then saved to <see cref="Folder"/>.</summary>
+    private static string LegacyFilePath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Sweetch", "settings.json");
 
     private static string FilePath => Path.Combine(Folder, "settings.json");
 
@@ -92,8 +95,9 @@ public sealed class AppSettings
     {
         try
         {
-            if (File.Exists(FilePath))
-                return JsonSerializer.Deserialize(File.ReadAllText(FilePath), SettingsJson.Default.AppSettings) ?? new AppSettings();
+            var path = File.Exists(FilePath) ? FilePath : LegacyFilePath;
+            if (File.Exists(path))
+                return JsonSerializer.Deserialize(File.ReadAllText(path), SettingsJson.Default.AppSettings) ?? new AppSettings();
         }
         catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException)
         {
