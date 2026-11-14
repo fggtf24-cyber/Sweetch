@@ -110,6 +110,33 @@ public static class Catalog
             { Requires = [ExternalTool.Ffmpeg] });
         }
 
+        // Editing intermediate in MOV with PCM audio. 4:2:2 needs an even width; 4444 keeps alpha when the source has it.
+        ops.Add(new PerFileOperation("video.to.prores", WheelKind.Convert, "ProRes", Glyphs.Video, Formats.Video,
+            async (item, ctx, p) =>
+            {
+                var (profile, pix) = ctx.Param("profile", "422 HQ") switch
+                {
+                    "Proxy" => ("0", "yuv422p10le"),
+                    "LT" => ("1", "yuv422p10le"),
+                    "422" => ("2", "yuv422p10le"),
+                    "4444" => ("4", "yuva444p10le"),
+                    _ => ("3", "yuv422p10le"),
+                };
+                return [await OutputPaths.ProduceAsync(ctx.OutputDirFor(item.Path), item.BaseName, "mov", tmp =>
+                    FfmpegBackend.RunAsync(ctx, [item.Path],
+                        ["-c:v", "prores_ks", "-profile:v", profile, "-pix_fmt", pix, "-vendor", "apl0",
+                         "-vf", "scale=trunc(iw/2)*2:ih", "-c:a", "pcm_s16le"], tmp, p))];
+            }, subtitle: T("pick profile", "выбор профиля"))
+        {
+            Requires = [ExternalTool.Ffmpeg],
+            Parameters =
+            [
+                new ParameterSpec("profile", T("Profile", "Профиль"), "422 HQ",
+                    T("Proxy and LT are lighter, 4444 keeps transparency", "Proxy и LT легче, 4444 сохраняет прозрачность"),
+                    ["Proxy", "LT", "422", "422 HQ", "4444"]),
+            ],
+        });
+
         Ffmpeg(ops, "video.compress", T("Compress", "Сжать"), Glyphs.Shrink, Formats.Video, T("compressed", "сжато"),
             (item, ctx) => H264(ctx.Settings.CompressVideoCrf, "slow", null, "128k"), outputFormat: _ => "mp4", subtitle: "H.264");
         Ffmpeg(ops, "video.720p", "720p", Glyphs.Shrink, Formats.Video, "720p",

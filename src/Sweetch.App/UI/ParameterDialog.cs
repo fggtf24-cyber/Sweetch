@@ -10,6 +10,7 @@ namespace Sweetch.App.UI;
 internal sealed class ParameterDialog : Window
 {
     private readonly Dictionary<string, TextBox> _boxes = new();
+    private readonly Dictionary<string, string> _picked = new();
 
     public ParameterDialog(Operation op, IReadOnlyList<FileItem> items)
     {
@@ -37,6 +38,17 @@ internal sealed class ParameterDialog : Window
         foreach (var p in op.Parameters)
         {
             stack.Children.Add(new TextBlock { Text = p.Label, Margin = new Thickness(0, 6, 0, 4) });
+            if (p.Choices is { } choices)
+            {
+                var key = p.Key;
+                _picked[key] = p.DefaultValue;
+                var seg = Controls.Segmented([.. choices.Select(c => (c, c))], p.DefaultValue, v => _picked[key] = v);
+                seg.HorizontalAlignment = HorizontalAlignment.Left;
+                stack.Children.Add(seg);
+                if (p.Hint is not null)
+                    stack.Children.Add(new TextBlock { Text = p.Hint, Opacity = 0.65, FontSize = 11.5, Margin = new Thickness(0, 3, 0, 0) });
+                continue;
+            }
             var box = new TextBox
             {
                 Text = p.DefaultValue,
@@ -82,5 +94,6 @@ internal sealed class ParameterDialog : Window
         };
     }
 
-    public IReadOnlyDictionary<string, string> Values => _boxes.ToDictionary(kv => kv.Key, kv => kv.Value.Text);
+    public IReadOnlyDictionary<string, string> Values =>
+        _boxes.Select(kv => KeyValuePair.Create(kv.Key, kv.Value.Text)).Concat(_picked).ToDictionary();
 }

@@ -238,6 +238,24 @@ public class IntegrationTests : IClassFixture<IntegrationTests.Samples>
         }
     }
 
+    [Theory]
+    [InlineData("422 HQ", "HQ")]
+    [InlineData("Proxy", "Proxy")]
+    [InlineData("4444", "4444")]
+    public async Task Video_to_prores(string profile, string expected)
+    {
+        if (!_s.Files.TryGetValue("mp4", out var mp4))
+            return;
+        var op = Catalog.Build().Single(o => o.Id == "video.to.prores");
+        var outDir = Path.Combine(_s.Dir, "out", "prores-" + expected);
+        var result = await op.ExecuteAsync([new FileItem(mp4)], _s.Context(outDir, new() { ["profile"] = profile }));
+        Assert.EndsWith(".mov", result.Outputs[0]);
+        var probe = new List<string>();
+        try { await ProcessRunner.RunAsync(_s.Tools.Ffmpeg!, ["-hide_banner", "-i", result.Outputs[0]], default, probe.Add); }
+        catch (ConversionException) { } // ffmpeg exits 1 with no output file, but still prints the streams
+        Assert.Contains(probe, l => l.Contains("prores", StringComparison.OrdinalIgnoreCase) && l.Contains(expected, StringComparison.Ordinal));
+    }
+
     [Fact]
     public async Task Video_without_audio_gives_clear_error()
     {
